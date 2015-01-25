@@ -100,7 +100,7 @@
 				$('.cloth-layer').css('display','none')
 				for (var i = data.choise.length - 1; i >= 0; i--) {
 					elem = $('.cloth-group-'+data.choise[i].group);
-					desc_elem = $('.cloth-description-group'+data.choise[i].group);
+					desc_elem = $('.cloth-description-group-'+data.choise[i].group);
 					desc_elem.prepend('<img src='+data.choise[i].img+'/>');
 					desc_elem.prepend('<p>' + data.choise[i].name + '</p>');
 					elem.attr('src',data.choise[i].img);
