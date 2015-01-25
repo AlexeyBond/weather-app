@@ -230,7 +230,7 @@ body {
 	left: 50%;
 	top: 0px;
 	opacity: 0;
-	padding-left:10%;
+	padding-left:15%;
 }
 
 .cloth-description-girl *{
@@ -239,6 +239,7 @@ body {
 	height: auto;
 	opacity: 1;
 	float: left;
+	z-index: 1000;
 }
 .cloth-description-boy *{
 	margin: 5px;
@@ -246,4 +247,5 @@ body {
 	height: auto;
 	opacity: 1;
 	float: left;
+	z-index: 1000;
 }
