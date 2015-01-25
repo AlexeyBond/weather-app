@@ -222,6 +222,7 @@ body {
 	z-index: 1000;
 	display: none;
 	position: relative;
+	overflow: auto;
 }
 
 .cloth-description-girl{
@@ -234,17 +235,18 @@ body {
 	padding-left:15%;
 	z-index: 1000;
 	display: none;
+	overflow: auto;
 }
 
 .cloth-description-girl *{
+	margin-top: 30px;
 	margin: 5px;
 	width: 35%;
 	height: auto;
-	float: left;
 }
 .cloth-description-boy *{
+	margin-top: 30px;
 	margin: 5px;
 	width: 35%;
 	height: auto;
-	float: left;
 }
