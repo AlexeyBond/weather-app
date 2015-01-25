@@ -215,37 +215,36 @@ body {
 }
 
 .cloth-description-boy{
-	background: #97f7e4;
+	background: rgba(247, 247, 228, 0.5);
 	float: left;
 	width: 50%;
-	opacity: 0;
 	padding-right:-10%;
 	z-index: 1000;
+	display: none;
+	position: relative;
 }
 
 .cloth-description-girl{
-	background: #f7f7e4;
+	background: rgba(247, 247, 228, 0.5);
 	float: left;
 	width: 50%;
 	position: absolute;
 	left: 50%;
 	top: 0px;
-	opacity: 0;
 	padding-left:15%;
 	z-index: 1000;
+	display: none;
 }
 
 .cloth-description-girl *{
 	margin: 5px;
 	width: 35%;
 	height: auto;
-	opacity: 1;
 	float: left;
 }
 .cloth-description-boy *{
 	margin: 5px;
 	width: 35%;
 	height: auto;
-	opacity: 1;
 	float: left;
 }

@@ -219,12 +219,10 @@
 			}
 			function show_description(){
 				if (description_visible){
-					$('.cloth-description-girl').css('opacity','0');
-					$('.cloth-description-boy').css('opacity','0');
+					$('.cloth-description-girl,.cloth-description-boy').hide();
 					description_visible = false;
 				}else{
-					$('.cloth-description-girl').css('opacity','0.5');
-					$('.cloth-description-boy').css('opacity','0.5');
+					$('.cloth-description-girl,.cloth-description-boy').show();
 					description_visible = true;
 				}
 			}
