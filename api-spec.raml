@@ -1,0 +1,108 @@
+#%RAML 0.8
+
+title: Weather app API
+baseUri: http://localhost/api/{version}
+version: v0
+
+/weather:
+	description: |
+		Возвращает информайию о погоде.
+	queryParameters:
+		city_id:
+			type: integer
+			required: true
+			description: |
+				Id города, погодные условия которого запрошены.
+	get:
+		responses:
+			200:
+				body:
+					application/json:
+						schema: |
+							{
+								"$schema": "http://json-schema.org/schema",
+								"type": "object",
+								"properties": {
+									"temperature": {
+										"type": "number",
+
+									},
+									"windVelocity": {
+										"type": "number"
+									},
+									"windDirection": {
+										"type": "string",
+										"pattern": "^(S{1,2}|N{1,2})(E{1,2}|W{1,2})$"
+									}
+								},
+								"required": ["temperature","windVelocity","windDirection"]
+							}
+			404:
+
+/cloth:
+	/item/{item_id}:
+		get:
+			description: |
+				Возвращает информацию о предмете гардероба.
+			responses:
+				200:
+					body:
+						application/json:
+							schema: |
+								{
+									"$schema": "http://json-schema.org/schema",
+									"type": "object",
+									"description": "Описание предмета гардероба."
+									"properties": {
+										"name": {
+											"type": "string",
+											"description": "Название"
+										},
+										"description": {
+											"type": "string",
+											"description": "Текст - описание"
+										},
+										"group": {
+											"type": "string",
+											"description": "Группа. Определяет, где рисовать картинку."
+										},
+										"img": {
+											"type": "string",
+											"description": "URL файла картинки."
+										}
+									},
+									required: ["name","description","group","layer"]
+								}
+				404:
+	/choose:
+		get:
+			description: |
+				Выбирает набор предметов одежды к заданным погодным условиям.
+			queryParameters:
+				season:
+					enum: ["winter","spring","summer","autumn"]
+					required: false
+					description: |
+						Время года (пока не обязательно).
+				temperature:
+					type: number
+					required: true
+					description: |
+						Температура.
+				windVelocity:
+					type: number
+					required: false
+					description: |
+						Скорость ветра (пока не обязательно).
+			responses:
+				200:
+					body:
+						application/json:
+							schema: |
+								{
+									"$schema": "http://json-schema.org/schema",
+									"type": "array",
+									"items": {
+										"type": "integer"
+									}
+								}
