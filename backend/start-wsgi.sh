@@ -1,2 +1,2 @@
 #!/bin/sh
-uwsgi --http :8888 --chdir ./weather_app --pp ./weather_app -w weather_app.wsgi
+uwsgi --http :8888 --pp . -w weather_app.app --callable app

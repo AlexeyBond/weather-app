@@ -2,7 +2,7 @@
 
 apt-get install nginx
 apt-get install python python-pip
-pip install django
+pip install flask
 pip install uwsgi
 
 mkdir /srv/www
