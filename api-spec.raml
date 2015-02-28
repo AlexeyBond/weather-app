@@ -1,10 +1,10 @@
 #%RAML 0.8
 
 title: Weather app API
-baseUri: http://localhost/api/{version}/{cityId}
+baseUri: http://localhost/api/{version}
 version: v0
 
-/weather:
+/weather/{cityId}:
 	description: |
 		Возвращает информацию о погоде.
 	get:
