@@ -39,11 +39,17 @@ version: v0
 									"weatherThumbnailURL": {
 										"type": "string"
 									},
+									"weatherInWords": {
+										"type": "string"
+									},
 									"clothes": {
 										"type": "array",
 										"items": {
 											"type": "object",
 											"properties": {
+												"name": {
+													"type": "string"
+												},
 												"depth": {
 													"type": "number"
 												},
@@ -52,10 +58,10 @@ version: v0
 												}
 											}
 										},
-										"required": ["depth", "imgURL"]
+										"required": ["name", "depth", "imgURL"]
 									}
 								},
-								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "clothes"]
+								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords", "clothes"]
 							}
 			404:
 
