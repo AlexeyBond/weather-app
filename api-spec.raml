@@ -1,18 +1,12 @@
 #%RAML 0.8
 
 title: Weather app API
-baseUri: http://localhost/api/{version}
+baseUri: http://localhost/api/{version}/{cityId}
 version: v0
 
 /weather:
 	description: |
 		Возвращает информацию о погоде.
-	queryParameters:
-		city_id:
-			type: integer
-			required: true
-			description: |
-				Id города, погодные условия которого запрошены.
 	get:
 		responses:
 			200:
