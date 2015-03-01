@@ -112,8 +112,13 @@ version: v0
 							schema: |
 								{
 									"$schema": "http://json-schema.org/schema",
-									"type": "array",
-									"items": {
-										"type": "integer"
+									"type": "object",
+									"properties": {
+										"choise": {
+											"type": "array",
+											"items": {
+												"type": "integer"
+											}
+										}
 									}
 								}
