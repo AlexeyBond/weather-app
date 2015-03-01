@@ -6,7 +6,7 @@ version: v0
 
 /weather:
 	description: |
-		Возвращает информайию о погоде.
+		Возвращает информацию о погоде.
 	queryParameters:
 		city_id:
 			type: integer
@@ -25,7 +25,9 @@ version: v0
 								"properties": {
 									"temperature": {
 										"type": "number",
-
+									},
+									"temperatureFeelsLike": {
+										"type": "number",
 									},
 									"windVelocity": {
 										"type": "number"
@@ -34,11 +36,17 @@ version: v0
 										"type": "string",
 										"pattern": "^(S{1,2}|N{1,2})(E{1,2}|W{1,2})$"
 									},
+									"weatherThumbnailURL": {
+										"type": "string"
+									},
+									"weatherInWords": {
+										"type": "string"
+									},
 									"outOfDate": {
 										"type": "boolean"
 									}
 								},
-								"required": ["temperature","windVelocity","windDirection"]
+								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords"]
 							}
 			404:
 
