@@ -1,3 +1,4 @@
+#coding=UTF-8
 import httplib
 import xml.sax
 
@@ -5,19 +6,18 @@ YANDEX_WEATHER_HOST = 'export.yandex.ru'
 YANDEX_WEATHER_PATH = '/weather-ng/forecasts/{city_id}.xml'
 
 WEATHER_STATE_MAP = {
-	'weather_type':'weatherType',
+	'weather_type':'weatherInWords',
 	'wind_direction':'windDirection',
 	'wind_speed':'windVelocity',
-	'temperature':'temperature'
+	'temperature':'temperature',
+	'humidity':'humidity'
 }
 
 class yandex_weather_parser_handler(xml.sax.ContentHandler):
 	def __init__(self):
 		self.weather_state = {}
-		self.weather_state['weatherType'] = ''
-		self.weather_state['windDirection'] = ''
-		self.weather_state['windVelocity'] = ''
-		self.weather_state['temperature'] = ''
+		for k,v in WEATHER_STATE_MAP.items():
+			self.weather_state[v] = ''
 
 		self.elem_stack = []
 
@@ -34,7 +34,12 @@ class yandex_weather_parser_handler(xml.sax.ContentHandler):
 
 	def endDocument(self):
 		self.weather_state['temperature'] = float(self.weather_state['temperature'])
+		self.weather_state['humidity'] = float(self.weather_state['humidity'])
+		self.weather_state['windVelocity'] = float(self.weather_state['windVelocity'])
 		self.weather_state['windDirection'] = self.weather_state['windDirection'].upper()
+
+		self.weather_state['temperatureFeelsLike'] = self.weather_state['temperature'] * (1.0 + (self.weather_state['humidity']-50)*0.01*0.5)
+		self.weather_state['weatherThumbnailURL'] = 'img/nope.jpg'
 
 def parse_weather_info(city_id,prepared_connection=None):
 	connection = prepared_connection

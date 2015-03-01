@@ -9,7 +9,7 @@ import traceback
 DB_URI =	'mongodb://localhost:27017/'
 DB_NAME =	'weatherapp_db'
 
-WEATHER_UPDATE_PERIOD = datetime.timedelta(minutes=10)
+WEATHER_UPDATE_PERIOD = datetime.timedelta(minutes=1)
 
 db_client = pymongo.MongoClient(DB_URI)
 db = db_client[DB_NAME]
@@ -22,8 +22,12 @@ def page_not_found(e):
 	return 'Internal server error', 500
 
 @app.route('/api/v0/weather',methods=['GET'])
-def weather():
+def weather1():
 	city_id = request.args.get('city_id',None)
+	return weather(city_id=city_id)
+
+@app.route('/api/v0/weather/<int:city_id>',methods=['GET'])
+def weather(city_id=None):
 
 	if city_id == None:
 		abort(418)
@@ -60,6 +64,71 @@ def weather():
 			db.weather_cache.save(weather)
 
 	return jsonify(weather_state)
+
+@app.route('/api/v0/cloth/item/<int:item_id>',methods=['GET'])
+def cloth_getitem(item_id=0):
+	item = db.cloth_items.find_one({'id':int(item_id)})
+
+	if item == None:
+		return Response('{}',mimetype='application/json',status=404)
+
+	return jsonify(item.get('description',{}))
+
+def check_item_condition(cond,context):
+	value = context.get(cond.get('value',''),'0')
+	cond_ok = True
+
+	if 'is' in cond:
+		cond_ok = cond_ok and (str(value) == cond['is'])
+
+	if 'from' in cond:
+		cond_ok = cond_ok and (float(value) > float(cond['from']))
+
+	if 'to' in cond:
+		cond_ok = cond_ok and (float(value) < float(cond['to']))
+
+	return cond_ok
+
+def calc_item_weight(item,context):
+	conditions = item.get('conditions',[])
+
+	weight = 0.0
+
+	for cond in conditions:
+		weight += cond.get('weight',0.0) * (1.0 if check_item_condition(cond,context) else 0.0)
+
+	return weight
+
+@app.route('/api/v0/cloth/choose',methods=['GET'])
+def cloth_choose():
+	context = {}
+	context['temperature'] = float(request.args.get('temperature',0))
+	context['windVelocity'] = float(request.args.get('windVelocity',0))
+	context['season'] = request.args.get('season','')
+
+	itemgroups = {}
+
+	for item in db.cloth_items.find():
+		item = dict(item)
+		del item['_id']
+		group = item.get('description',{}).get('group','')
+		weight = calc_item_weight(item,context)
+		item['weight'] = weight
+		if group not in itemgroups:
+			itemgroups[group] = item
+		else:
+			weight = calc_item_weight(item,context)
+			if itemgroups[group]['weight'] < weight:
+				itemgroups[group] = item
+
+	choosen = []
+
+	for k, v in itemgroups.items():
+		choosen += [int(v.get('id',0))]
+
+	print '>>>> ',str(choosen)
+
+	return jsonify({'choise':choosen})
 
 if __name__ == '__main__':
 	app.run( )
