@@ -1,0 +1,88 @@
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#humans {
+  background-image: url(background.png);
+  margin-left: auto;
+  margin-right: auto;
+  width: 660px;
+  height: 500px;
+  background-color: #FFFFFF;
+}
+
+#panel {
+  width: 660px;
+  height: 272px;
+  background-color: #69CEF9;
+  
+}
+
+.human {
+  position: static;
+  height: 100%;
+  width: 50%;
+  display: inline-block;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.weather-frame {
+  position: static;
+  height: 100%;
+  width: 33.3%;
+  display: inline-block;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.weather-tile {
+  width: 200px;
+  height: 200px;
+  line-height: 180px;
+  background-color: #FFFFFF;
+  position: static;
+  margin-top: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-down: 10px;
+  display: inline-block;
+  text-align: center;
+  font-size: 100px;
+  color: #333333;
+}
+
+.weather-text {
+  width:100%;
+  display: inline-block;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+  height: 50px;
+  line-height: 40px;
+  font-size: 22px;
+  color: #FFFFFF;
+}
+
+.state {
+  font-family: 'Roboto', sans-serif;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+.kartinka {
+  font-family: 'Roboto', sans-serif;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+img {
+  width: 130px;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
