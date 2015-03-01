@@ -4,9 +4,15 @@ title: Weather app API
 baseUri: http://localhost/api/{version}
 version: v0
 
-/weather/{cityId}:
+/weather:
 	description: |
 		Возвращает информацию о погоде.
+	queryParameters:
+		city_id:
+			type: integer
+			required: true
+			description: |
+				Id города, погодные условия которого запрошены.
 	get:
 		responses:
 			200:
@@ -36,26 +42,11 @@ version: v0
 									"weatherInWords": {
 										"type": "string"
 									},
-									"clothes": {
-										"type": "array",
-										"items": {
-											"type": "object",
-											"properties": {
-												"name": {
-													"type": "string"
-												},
-												"depth": {
-													"type": "number"
-												},
-												"imgURL": {
-													"type": "string"
-												}
-											}
-										},
-										"required": ["name", "depth", "imgURL"]
+									"outOfDate": {
+										"type": "boolean"
 									}
 								},
-								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords", "clothes"]
+								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords"]
 							}
 			404:
 
