@@ -22,7 +22,7 @@
 			function make_form(desc,empty) {
 				text = '';
 				text += '<div><form method="{0}" action="{1}">'.format(desc.method,desc.action);
-				text += '<h2>{0} <small>{1}</small></h2>'.format(desc.title,desc.titlesm)
+				text += '<h2>{0} {1}</h2>'.format(desc.title,desc.titlesm?'<small>{0}</small>'.format(desc.titlesm):'')
 				for (var i = 0; i < desc.inputs.length; i++) {
 					inp = desc.inputs[i];
 
@@ -53,9 +53,14 @@
 				var xmlhttp = new XMLHttpRequest();
 
 				xmlhttp.onreadystatechange = function() {
-					if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 						var jsonObj = JSON.parse(xmlhttp.responseText);
 						callback(jsonObj);
+						authorized();
+					};
+
+					if(xmlhttp.status == 401) {
+						unauthorized();
 					};
 				};
 
@@ -63,7 +68,7 @@
 				xmlhttp.send();
 			};
 
-			function loadClothesInfo () {
+			function loadClothesInfo() {
 				send_request('GET','/api/v0/cloth/items',lci_cb);
 
 				function lci_cb(obj) {
@@ -72,24 +77,24 @@
 					for (var i = 0; i < arr.length; i++) {
 						var item = arr[i];
 						var fdesc = {
-							method:'POST',action:'/api/v0/cloth/item/'+item.id,submittitle:'Save!',
-							title:'Item #'+item.id,titlesm:'('+item._id+'):',
+							method:'POST',action:'/api/v0/cloth/items/'+item._id,submittitle:'Save!',
+							title:'Item #'+item._id+':',titlesm:'',
 							inputs:[
 								{desc:'Name:',type:'text',name:'description.name',value:item.description.name},
-								{desc:'Description:',type:'text',name:'description.description',value:item.description.description},
+								{desc:'Description:',type:'textarea',name:'description.description',value:item.description.description},
 								{desc:'Group:',type:'text',name:'description.group',value:item.description.group},
 								{desc:'Image URL:',type:'text',name:'description.img',value:item.description.img,img:true},
 								{desc:'Conditions:',type:'textarea',name:'conditions',value:JSON.stringify(item.conditions)},
-								{desc:'',type:'hidden',name:'id',value:item.id},
-								{desc:'',type:'hidden',name:'_id',value:item._id}
+								{desc:'',type:'hidden',name:'from',value:'/admin.html'}
 							]};
 						out += make_form(fdesc);
+						out += '\n<hr />\n';
 					};
 					document.getElementById('container').innerHTML = out;
 				};
 			};
 
-			function loadWeatherInfo () {
+			function loadWeatherInfo() {
 				send_request('GET','/api/v0/weather/cached',lwi_cb);
 
 				function lwi_cb (obj) {
@@ -99,7 +104,7 @@
 						record = arr[i];
 						var fdesc = {
 							method:'POST',action:'/api/v0/weather/'+record.city_id,submittitle:'Save!',
-							title:'Weather in city '+record.city_id,titlesm:'('+record._id+'):',
+							title:'Weather in city '+record.city_id+':',titlesm:'',
 							inputs:[
 								{desc:'Updated:',type:'text',name:'updated',value:record.updated},
 								{desc:'Temperature:',type:'text',name:'state.temperature',value:record.state.temperature},
@@ -108,23 +113,77 @@
 								{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:record.state.weatherInWords},
 								{desc:'Humidity:',type:'text',name:'state.humidity',value:record.state.humidity},
 								{desc:'Thumbnail image:',type:'text',name:'state.weatherThumbnailURL',value:record.state.weatherThumbnailURL,img:true},
-								{desc:'',type:'hidden',name:'id',value:record.id},
-								{desc:'',type:'hidden',name:'_id',value:record._id}
+								{desc:'',type:'hidden',name:'from',value:'/admin.html'}
 							]
 						};
 						out += make_form(fdesc);
+						out += '\n<hr />\n';
 					};
 					document.getElementById('container').innerHTML = out;
 				};
+			};
+
+			function newWeatherRecord() {
+				var fdesc = {
+					method:'POST',action:'/api/v0/weather',submittitle:'Save!',
+					title:'New weather cache record:',titlesm:'',
+					inputs:[
+						{desc:'City ID:',type:'text',name:'city_id',value:'0'},
+						{desc:'Updated:',type:'text',name:'updated',value:'Sun, 01 Mar 2015 16:02:28 +0000'},
+						{desc:'Temperature:',type:'text',name:'state.temperature',value:'+0'},
+						{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:'100'},
+						{desc:'Wind direction:',type:'text',name:'state.windDirection',value:'SSE'},
+						{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:'Fucking deadly storm.'},
+						{desc:'Humidity:',type:'text',name:'state.humidity',value:'150'},
+						{desc:'Thumbnail image:',type:'text',name:'state.weatherThumbnailURL',value:'img/apocalypse.png'},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function newClothItem() {
+				var fdesc = {
+					method:'POST',action:'/api/v0/cloth/items',submittitle:'Save!',
+					title:'New cloth item:',titlesm:'',
+					inputs:[
+						{desc:'Name:',type:'text',name:'description.name',value:'Шуба'},
+						{desc:'Description:',type:'textarea',name:'description.description',value:'Шубка сшитая подневольными китайцами в московских подвалах из щкурок тысячи жестоко убитых мышек, обитавших там же. Согреет ваше тело и Эго в лютые морозы.'},
+						{desc:'Group:',type:'text',name:'description.group',value:'top'},
+						{desc:'Image URL:',type:'text',name:'description.img',value:'img/cloth/shuba.png'},
+						{desc:'Conditions:',type:'textarea',name:'conditions',value:JSON.stringify([{variable:'temperature',to:0,weight:1}])},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function unauthorized() {
+				var fdesc = {
+					method:'POST', action:'/api/v0/login',submittitle:'Login!',
+					title:'Login form',
+					inputs:[
+						{desc:'Login',type:'text',name:'login',value:''},
+						{desc:'Password',type:'password',name:'password',value:''},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function authorized() {
+				document.getElementById('logout_span').innerHTML =
+					'<form action="/api/v0/logout" method="POST"><input type="hidden" name="from" value="/admin.html" /><input type="submit" value="Logout" /></form>';
 			};
 		</script>
 	</head>
 	<body onload='loadWeatherInfo()'>
 		<div>
 			<a href='#' onclick='loadClothesInfo()'>Clothes</a>
-			[<a href='#' onclick='createClothItem()'>new</a>]
+			[<a href='#' onclick='newClothItem()'>new</a>]
 			<a href='#' onclick='loadWeatherInfo()'>Weather</a>
-			[<a href='#' onclick='createWeatherEntry()'>new</a>]
+			[<a href='#' onclick='newWeatherRecord()'>new</a>]
+			<span id='logout_span'></span>
 		</div>
 		<div id='container'>
 		</div>

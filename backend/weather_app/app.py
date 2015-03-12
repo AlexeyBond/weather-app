@@ -8,6 +8,10 @@ import yawparser
 import datetime
 import traceback
 
+import uuid
+
+from functools import wraps
+
 DB_URI =	'mongodb://localhost:27017/'
 DB_NAME =	'weatherapp_db'
 
@@ -77,7 +81,7 @@ def weather(city_id=None):
 
 	return jsonify(weather_state)
 
-@app.route('/api/v0/cloth/item/<int:item_id>',methods=['GET'])
+@app.route('/api/v0/cloth/items/<int:item_id>',methods=['GET'])
 def cloth_getitem(item_id=0):
 	item = db.cloth_items.find_one({'id':int(item_id)})
 
@@ -144,42 +148,97 @@ def cloth_choose():
 
 ### API Calls for debugging/administration
 
-@app.route('/api/v0/cloth/item/<int:item_id>',methods=['POST'])
-def cloth_postitem(item_id=0):
+def requiresAuthentication(view):
+	@wraps(view)
+	def wrapper(*args,**kwargs):
+		cookie = request.cookies.get('session_id','')
+		if db.sessions.find_one({'session_id':cookie}) == None:
+			abort(401)
+		return view(*args,**kwargs)
+	return wrapper
+
+@app.route('/api/v0/login',methods=['POST'])
+def login():
+	username = request.form['login']
+	password = request.form['password']
+	redirect_to = request.form.get('from','/')
+	resp = redirect(redirect_to)
+	if db.users.find_one({'name':username,'password':password}) != None:
+		session_id = str(uuid.uuid4())
+		db.sessions.insert({
+			'username':username,
+			'session_id':session_id,
+			'created':datetime.datetime.now()})
+		resp.set_cookie('session_id',session_id)
+	return resp
+
+@app.route('/api/v0/logout',methods=['POST'])
+def logout():
+	session_id = request.cookies.get('session_id',None)
+
+	if session_id == None:
+		abort(400)
+
+	db.sessions.remove({'session_id':session_id})
+
+	resp = redirect(request.form.get('from','/'))
+	resp.set_cookie('session_id','',expires=0)
+
+	return resp
+
+@app.route('/api/v0/cloth/items',methods=['POST'])
+def cloth_post_new():
+	return cloth_postitem(None)
+
+@app.route('/api/v0/cloth/items/<item_id>',methods=['POST'])
+@requiresAuthentication
+def cloth_postitem(item_id=None):
 	postitem = {'description':{}}
+
+	if item_id != None:
+		postitem['_id'] = bson.ObjectId(item_id)
+
 	postitem['description']['name'] = request.form['description.name']
 	postitem['description']['description'] = request.form['description.description']
 	postitem['description']['group'] = request.form['description.group']
 	postitem['description']['img'] = request.form['description.img']
-	postitem['id'] = int(request.form['id'])
-	postitem['_id'] = bson.ObjectId(request.form['_id'])
 	postitem['conditions'] = json.loads(request.form['conditions'])
 	db.cloth_items.save(postitem)
 	if request_wants_json():
 		return jsonify({'status':'OK'})
 	else:
-		return redirect('/frontend/admin.html')
+		return redirect('/admin.html')
+
+@app.route('/api/v0/weather',methods=['POST'])
+def weathercache_post_new():
+	return weathercache_post(int(request.form['city_id']))
 
 @app.route('/api/v0/weather/<int:city_id>',methods=['POST'])
+@requiresAuthentication
 def weathercache_post(city_id=0):
 	postrecord={'state':{}}
-	postrecord['city_id'] = int(request.form['id'])
-	postrecord['_id'] = bson.ObjectId(request.form['_id'])
-	postrecord['updated'] = datetime.strptime(request.form['updated'],"%a, %d %b %Y %H:%M:%S +0000")
+	postrecord['city_id'] = city_id
+	postrecord['updated'] = datetime.datetime.strptime(request.form['updated'],"%a, %d %b %Y %H:%M:%S +0000")
 	postrecord['state']['temperature'] = float(request.form['state.temperature'])
 	postrecord['state']['windVelocity'] = float(request.form['state.windVelocity'])
 	postrecord['state']['windDirection'] = request.form['state.windDirection']
 	postrecord['state']['weatherInWords'] = request.form['state.weatherInWords']
 	postrecord['state']['humidity'] = float(request.form['state.humidity'])
 	postrecord['state']['weatherThumbnailURL'] = request.form['state.weatherThumbnailURL']
+
+	exist_record = db.weather_cache.find_one({'city_id':city_id})
+	if exist_record != None:
+		postrecord['_id'] = exist_record['_id']
+
 	db.weather_cache.save(postrecord)
 	if request_wants_json():
 		return jsonify({'status':'OK'})
 	else:
-		return redirect('/frontend/admin.html')
+		return redirect(request.form.get('from','/'))
 
 
 @app.route('/api/v0/cloth/items',methods=['GET'])
+@requiresAuthentication
 def cloth_getitems():
 	items = list(db.cloth_items.find())
 	for item in items:
@@ -187,10 +246,11 @@ def cloth_getitems():
 	return jsonify({'items':items})
 
 @app.route('/api/v0/weather/cached',methods=['GET'])
+@requiresAuthentication
 def weathercache_get():
 	records = list(db.weather_cache.find())
 	for rec in records:
-		rec['_id'] = str(rec['_id'])
+		del rec['_id']
 		rec['updated'] = rec['updated'].strftime("%a, %d %b %Y %H:%M:%S +0000")
 	return jsonify({'records':records})
 
