@@ -5,56 +5,10 @@ baseUri: http://localhost/api/{version}
 version: v0
 
 /weather:
-	description: |
-		Возвращает информацию о погоде.
-	queryParameters:
-		city_id:
-			type: integer
-			required: true
-			description: |
-				Id города, погодные условия которого запрошены.
-	get:
-		responses:
-			200:
-				body:
-					application/json:
-						schema: |
-							{
-								"$schema": "http://json-schema.org/schema",
-								"type": "object",
-								"properties": {
-									"temperature": {
-										"type": "number",
-									},
-									"temperatureFeelsLike": {
-										"type": "number",
-									},
-									"windVelocity": {
-										"type": "number"
-									},
-									"windDirection": {
-										"type": "string",
-										"pattern": "^(S{1,2}|N{1,2})(E{1,2}|W{1,2})$"
-									},
-									"weatherThumbnailURL": {
-										"type": "string"
-									},
-									"weatherInWords": {
-										"type": "string"
-									},
-									"outOfDate": {
-										"type": "boolean"
-									}
-								},
-								"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords"]
-							}
-			404:
-
-/cloth:
-	/item/{item_id}:
+	/{city_id}:
+		description: |
+			Информация о погоде в городе №{city_id}.
 		get:
-			description: |
-				Возвращает информацию о предмете гардероба.
 			responses:
 				200:
 					body:
@@ -63,28 +17,240 @@ version: v0
 								{
 									"$schema": "http://json-schema.org/schema",
 									"type": "object",
-									"description": "Описание предмета гардероба."
 									"properties": {
-										"name": {
-											"type": "string",
-											"description": "Название"
+										"temperature": {
+											"type": "number",
 										},
-										"description": {
-											"type": "string",
-											"description": "Текст - описание"
+										"temperatureFeelsLike": {
+											"type": "number",
 										},
-										"group": {
-											"type": "string",
-											"description": "Группа. Определяет, где рисовать картинку."
+										"windVelocity": {
+											"type": "number"
 										},
-										"img": {
+										"windDirection": {
 											"type": "string",
-											"description": "URL файла картинки."
+											"pattern": "^(S{1,2}|N{1,2})(E{1,2}|W{1,2})$"
+										},
+										"weatherThumbnailURL": {
+											"type": "string"
+										},
+										"weatherInWords": {
+											"type": "string"
+										},
+										"outOfDate": {
+											"type": "boolean"
 										}
 									},
-									required: ["name","description","group","layer"]
+									"required": ["temperature","temperatureFeelsLike","windVelocity","windDirection", "weatherThumbnailURL", "weatherInWords"]
 								}
 				404:
+		post:
+			description: |
+				Обновляет сохранённое в кэше состояние погоды для заданного города.
+				Только для отладки.
+			body:
+				multipart/form-data:
+					formParameters:
+						city_id:
+							type: integer
+						_id:
+							type: string
+						updated:
+							type: string
+						state.temperature:
+							type: float
+						state.temperatureFeelsLike:
+							type: float
+						state.windVelocity:
+							type: float
+						state.windDirection:
+							type: string
+						state.weatherThumbnailURL:
+							type: string
+						state.weatherInWords:
+							type: string
+	/cached:
+		get:
+			description: |
+				Закэшированная информация о погоде.
+				Только для отладки.
+			responses:
+				200:
+					body:
+						application/json:
+							schema: |
+								{
+									"$schema": "http://json-schema.org/schema",
+									"type": "object",
+									"properties": {
+										"records": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"city_id": {
+														"type": "integer",
+														"description": "id города"
+													},
+													"_id": {
+														"type": "string"
+													},
+													"state": {
+														"type": "object",
+														"properties": {
+															"temperature": {
+																"type": "number",
+															},
+															"temperatureFeelsLike": {
+																"type": "number",
+															},
+															"windVelocity": {
+																"type": "number"
+															},
+															"windDirection": {
+																"type": "string",
+																"pattern": "^(S{1,2}|N{1,2})(E{1,2}|W{1,2})$"
+															},
+															"weatherThumbnailURL": {
+																"type": "string"
+															},
+															"weatherInWords": {
+																"type": "string"
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+
+/cloth:
+	/items:
+		post:
+			description: |
+				Создаёт новый предмет одежды.
+			body:
+				multipart/form-data:
+					formParameters:
+						description.name:
+							type: string
+						description.description:
+							type: string
+						description.img:
+							type: file
+						description.group:
+							type: string
+						conditions:
+							type: string
+			responses:
+				201:
+				400:
+		get:
+			description: |
+				Информация о всех предметах одежды.
+			responses:
+				200:
+					body:
+						application/json:
+							schema: |
+								{
+									"$schema": "http://json-schema.org/schema",
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"description": {
+														"type": "object",
+														"description": "Описание предмета гардероба."
+														"properties": {
+															"name": {
+																"type": "string",
+																"description": "Название"
+															},
+															"description": {
+																"type": "string",
+																"description": "Текст - описание"
+															},
+															"group": {
+																"type": "string",
+																"description": "Группа. Определяет, где рисовать картинку."
+															},
+															"img": {
+																"type": "string",
+																"description": "URL файла картинки."
+															}
+														},
+														"required": ["name","description","group","img"]
+													},
+													"_id": {
+														"type": "string"
+													},
+													"conditions": {
+														"type": "string"
+													},
+													"required": ["description","_id","conditions"]
+												}
+											}
+										}
+									}
+								}
+		/{item_id}:
+			get:
+				description: |
+					Возвращает информацию о предмете гардероба.
+					Не использовать.
+				responses:
+					200:
+						body:
+							application/json:
+								schema: |
+									{
+										"$schema": "http://json-schema.org/schema",
+										"type": "object",
+										"description": "Описание предмета гардероба."
+										"properties": {
+											"name": {
+												"type": "string",
+												"description": "Название"
+											},
+											"description": {
+												"type": "string",
+												"description": "Текст - описание"
+											},
+											"group": {
+												"type": "string",
+												"description": "Группа. Определяет, где рисовать картинку. Вызов /cloth/choose возвращает не более одного предмета из каждой группы."
+											},
+											"img": {
+												"type": "string",
+												"description": "URL файла картинки."
+											}
+										},
+										"required": ["name","description","group","img"]
+									}
+					404:
+			post:
+				description: |
+					Обновляет информацию о предмете одежды.
+				body:
+					multipart/form-data:
+						formParameters:
+							description.name:
+								type: string
+							description.description:
+								type: string
+							description.img:
+								type: string
+							description.group:
+								type: string
+							_id:
+								type: string
+							conditions:
+								type: string
 	/choose:
 		get:
 			description: |
@@ -94,7 +260,7 @@ version: v0
 					enum: ["winter","spring","summer","autumn"]
 					required: false
 					description: |
-						Время года (пока не обязательно).
+						Время года.
 				temperature:
 					type: number
 					required: true
@@ -104,7 +270,7 @@ version: v0
 					type: number
 					required: false
 					description: |
-						Скорость ветра (пока не обязательно).
+						Скорость ветра.
 			responses:
 				200:
 					body:
@@ -117,7 +283,27 @@ version: v0
 										"choise": {
 											"type": "array",
 											"items": {
-												"type": "integer"
+												"type": "object",
+												"description": "Описание предмета гардероба."
+												"properties": {
+													"name": {
+														"type": "string",
+														"description": "Название"
+													},
+													"description": {
+														"type": "string",
+														"description": "Текст - описание"
+													},
+													"group": {
+														"type": "string",
+														"description": "Группа. Определяет, где рисовать картинку."
+													},
+													"img": {
+														"type": "string",
+														"description": "URL файла картинки."
+													}
+												},
+												"required": ["name","description","group","img"]
 											}
 										}
 									}
