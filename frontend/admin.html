@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Adminko</title>
+		<meta charset='UTF-8'>
+		<script>
+			if (!String.prototype.format) {
+				String.prototype.format = function() {
+					var args = arguments;
+					return this.replace(/{(\d+)}/g, function(match, number) { 
+						return typeof args[number] != 'undefined' ? args[number] : match;
+					});
+				};
+			};
+
+			if (!String.prototype.escape) {
+				String.prototype.escape = function () {
+					return this.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+				};
+			};
+
+			function make_form(desc,empty) {
+				text = '';
+				text += '<div><form method="{0}" action="{1}">'.format(desc.method,desc.action);
+				text += '<h2>{0} <small>{1}</small></h2>'.format(desc.title,desc.titlesm)
+				for (var i = 0; i < desc.inputs.length; i++) {
+					inp = desc.inputs[i];
+
+					if(empty) {
+						inp.value = ''
+					};
+
+					if (inp.type == 'textarea') {
+						text += '<p>{0}</p><p><textarea name="{1}" cols=50 rows=3>{2}</textarea></p>'
+							.format(inp.desc,inp.name,inp.value.escape())
+					} else {
+						text += '<p>{0} <input name="{1}" type="{2}" value="{3}" /></p>'
+							.format(inp.desc,inp.name,inp.type,String(inp.value).escape());
+						if(inp.img) {
+							text += '<p><a href="{0}"><img src="{0}" height=50 /></a></p>'
+								.format(inp.value);
+						};
+					};
+				};
+				text += '<input type="submit" value="{0}"/>'
+					.format(desc.submittitle);
+				text += '</form></div>'
+				return text;
+			};
+
+			function send_request(method,path,callback)
+			{
+				var xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+						var jsonObj = JSON.parse(xmlhttp.responseText);
+						callback(jsonObj);
+					};
+				};
+
+				xmlhttp.open(method, path, true);
+				xmlhttp.send();
+			};
+
+			function loadClothesInfo () {
+				send_request('GET','/api/v0/cloth/items',lci_cb);
+
+				function lci_cb(obj) {
+					var arr = obj.items;
+					var out = '';
+					for (var i = 0; i < arr.length; i++) {
+						var item = arr[i];
+						var fdesc = {
+							method:'POST',action:'/api/v0/cloth/item/'+item.id,submittitle:'Save!',
+							title:'Item #'+item.id,titlesm:'('+item._id+'):',
+							inputs:[
+								{desc:'Name:',type:'text',name:'description.name',value:item.description.name},
+								{desc:'Description:',type:'text',name:'description.description',value:item.description.description},
+								{desc:'Group:',type:'text',name:'description.group',value:item.description.group},
+								{desc:'Image URL:',type:'text',name:'description.img',value:item.description.img,img:true},
+								{desc:'Conditions:',type:'textarea',name:'conditions',value:JSON.stringify(item.conditions)},
+								{desc:'',type:'hidden',name:'id',value:item.id},
+								{desc:'',type:'hidden',name:'_id',value:item._id}
+							]};
+						out += make_form(fdesc);
+					};
+					document.getElementById('container').innerHTML = out;
+				};
+			};
+
+			function loadWeatherInfo () {
+				send_request('GET','/api/v0/weather/cached',lwi_cb);
+
+				function lwi_cb (obj) {
+					arr = obj.records;
+					var out = '';
+					for (var i = 0; i < arr.length; i++) {
+						record = arr[i];
+						var fdesc = {
+							method:'POST',action:'/api/v0/weather/'+record.city_id,submittitle:'Save!',
+							title:'Weather in city '+record.city_id,titlesm:'('+record._id+'):',
+							inputs:[
+								{desc:'Updated:',type:'text',name:'updated',value:record.updated},
+								{desc:'Temperature:',type:'text',name:'state.temperature',value:record.state.temperature},
+								{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:record.state.windVelocity},
+								{desc:'Wind direction:',type:'text',name:'state.windDirection',value:record.state.windDirection},
+								{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:record.state.weatherInWords},
+								{desc:'Humidity:',type:'text',name:'state.humidity',value:record.state.humidity},
+								{desc:'Thumbnail image:',type:'text',name:'state.weatherThumbnailURL',value:record.state.weatherThumbnailURL,img:true},
+								{desc:'',type:'hidden',name:'id',value:record.id},
+								{desc:'',type:'hidden',name:'_id',value:record._id}
+							]
+						};
+						out += make_form(fdesc);
+					};
+					document.getElementById('container').innerHTML = out;
+				};
+			};
+		</script>
+	</head>
+	<body onload='loadWeatherInfo()'>
+		<div>
+			<a href='#' onclick='loadClothesInfo()'>Clothes</a>
+			[<a href='#' onclick='createClothItem()'>new</a>]
+			<a href='#' onclick='loadWeatherInfo()'>Weather</a>
+			[<a href='#' onclick='createWeatherEntry()'>new</a>]
+		</div>
+		<div id='container'>
+		</div>
+	</body>
+</html>
