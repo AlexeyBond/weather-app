@@ -10,7 +10,7 @@ var WeatherPanel = Backbone.Model.extend({
     clothes: [{name: "Шуба", depth: 40, imgURL: "cosplay.png"}]
   }
 });
-var weatherPanel = new WeatherPanel({id: 55});
+var weatherPanel = new WeatherPanel({id: 28698});
 weatherPanel.fetch();
 
 
@@ -31,7 +31,7 @@ var WeatherPanelView = Backbone.View.extend({
       "<div class='weather-text'><span class='state'>Температура °С</span></div>",
     "</td>",
     "<td class='weather-frame'>",
-      "<div class='weather-tile'><span class='kartinka' id='zaebalcya-pisat-po-english'><%= temperatureFeelsLike %></span></div>",
+      "<div class='weather-tile'><span class='kartinka' id='zaebalcya-pisat-po-english'><%= Math.round(temperatureFeelsLike) %></span></div>",
       "<div class='weather-text'><span class='state'>Ощущается °С</span></div>",
     "</td>",
     "</tr>",
