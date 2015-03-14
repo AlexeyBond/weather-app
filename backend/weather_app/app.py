@@ -35,12 +35,12 @@ def page_not_found(e):
 	print "\n\n",traceback.format_exc(),"\n\n"
 	return 'Internal server error', 500
 
+### Main part of API
+
 @app.route('/api/v0/weather',methods=['GET'])
 def weather1():
 	city_id = request.args.get('city_id',None)
 	return weather(city_id=city_id)
-
-### Main part of API
 
 @app.route('/api/v0/weather/<int:city_id>',methods=['GET'])
 def weather(city_id=None):
@@ -98,7 +98,7 @@ def check_item_condition(cond,context):
 		cond_ok = cond_ok and (str(value) == cond['is'])
 
 	if 'from' in cond:
-		cond_ok = cond_ok and (float(value) > float(cond['from']))
+		cond_ok = cond_ok and (float(value) >= float(cond['from']))
 
 	if 'to' in cond:
 		cond_ok = cond_ok and (float(value) < float(cond['to']))
@@ -140,13 +140,20 @@ def cloth_choose():
 	choosen = []
 
 	for k, v in itemgroups.items():
-		choosen += [int(v.get('id',0))]
+		if v['weight'] > 0.01:
+			choosen += [v.get('description',{'error':'Achtung! Invalid recird in DB.'})]
 
 	print '>>>> ',str(choosen)
 
 	return jsonify({'choise':choosen})
 
 ### API Calls for debugging/administration
+
+def get_collection_scheme(collection,version='v0'):
+	meta = db[collection+'.meta'].find_one({'version':version})
+	schema = meta['schema']
+	schema['$schema'] = meta['metaschema']
+	return schema
 
 def requiresAuthentication(view):
 	@wraps(view)
@@ -157,29 +164,51 @@ def requiresAuthentication(view):
 		return view(*args,**kwargs)
 	return wrapper
 
+def new_session(username):
+	session_id = str(uuid.uuid4())
+	db.sessions.insert({
+			'username':username,
+			'session_id':session_id,
+			'created':datetime.datetime.now()})
+	return session_id
+
 @app.route('/api/v0/login',methods=['POST'])
 def login():
+	ct = request.headers.get('Content-Type',None)
+	if ct in ('application/x-www-form-urlencoded','multipart/form-data'):
+		return login_form( )
+
+	if ct == 'application/json':
+		return login_json( )
+
+	abort(400)
+
+def login_form():
 	username = request.form['login']
 	password = request.form['password']
 	redirect_to = request.form.get('from','/')
 	resp = redirect(redirect_to)
 	if db.users.find_one({'name':username,'password':password}) != None:
-		session_id = str(uuid.uuid4())
-		db.sessions.insert({
-			'username':username,
-			'session_id':session_id,
-			'created':datetime.datetime.now()})
-		resp.set_cookie('session_id',session_id)
+		resp.set_cookie('session_id',new_session(username))
 	return resp
 
+def login_json():
+	data = request.get_json()
+	username = data.get('username','')
+	password = data.get('password','')
+
+	if db.users.find_one({'name':username,'password':password}) != None:
+		session_id = new_session(username)
+		resp = jsonify({'status':'OK'})
+		resp.set_cookie('session_id',session_id)
+		return resp
+
+	abort(401)
+
 @app.route('/api/v0/logout',methods=['POST'])
+@requiresAuthentication
 def logout():
-	session_id = request.cookies.get('session_id',None)
-
-	if session_id == None:
-		abort(400)
-
-	db.sessions.remove({'session_id':session_id})
+	db.sessions.remove({'session_id':request.cookies['session_id']})
 
 	resp = redirect(request.form.get('from','/'))
 	resp.set_cookie('session_id','',expires=0)
@@ -189,6 +218,10 @@ def logout():
 @app.route('/api/v0/cloth/items',methods=['POST'])
 def cloth_post_new():
 	return cloth_postitem(None)
+
+@app.route('/api/v0/cloth/items.schema',methods=['GET'])
+def cloth_item_schema():
+	return jsonify(get_collection_scheme('cloth_items'))
 
 @app.route('/api/v0/cloth/items/<item_id>',methods=['POST'])
 @requiresAuthentication
@@ -207,7 +240,16 @@ def cloth_postitem(item_id=None):
 	if request_wants_json():
 		return jsonify({'status':'OK'})
 	else:
-		return redirect('/admin.html')
+		return redirect(request.form.get('from','/'))
+
+@app.route('/api/v0/cloth/items/<item_id>',methods=['DELETE'])
+@requiresAuthentication
+def cloth_delitem(item_id):
+	_id = bson.ObjectId(item_id)
+	res = db.cloth_items.remove({'_id':_id})
+	if res.get('n',0) == 0:
+		abort(404)
+	return jsonify({'status':'OK'})
 
 @app.route('/api/v0/weather',methods=['POST'])
 def weathercache_post_new():
@@ -240,7 +282,45 @@ def weathercache_post(city_id=0):
 @app.route('/api/v0/cloth/items',methods=['GET'])
 @requiresAuthentication
 def cloth_getitems():
-	items = list(db.cloth_items.find())
+	query = {}
+
+	if 'inname' in request.args:
+		query['description.name'] = {'$regex':'.*'+request.args['inname']+'.*','$options':'i'}
+
+	if 'group' in request.args:
+		query['description.group'] = request.args['group']
+
+	if 'indesc' in request.args:
+		query['description.description'] = {'$regex':'.*'+request.args['indesc']+'.*','$options':'i'}
+
+	qres = db.cloth_items.find(query)
+
+	if 'orderby' in request.args:
+		orderby = request.args['orderby']
+		if orderby == 'name':
+			qres = qres.sort([('description.name',1)])
+		elif orderby == 'group':
+			qres = qres.sort([('description.group',1)])
+		else:
+			abort(400)
+
+	if 'page' in request.args:
+		try:
+			page = int(request.args['page'])
+
+			if page < 1:
+				page = 1
+
+			count = int(request.args.get('count',10))
+
+			if count <= 0:
+				count = 10
+
+			qres = qres.skip(count*(page-1)).limit(count)
+		except:
+			abort(400)
+
+	items = list(qres)
 	for item in items:
 		item['_id'] = str(item['_id'])
 	return jsonify({'items':items})
