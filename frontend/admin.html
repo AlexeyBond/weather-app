@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Adminko</title>
+		<meta charset='UTF-8'>
+		<script>
+			if (!String.prototype.format) {
+				String.prototype.format = function() {
+					var args = arguments;
+					return this.replace(/{(\d+)}/g, function(match, number) { 
+						return typeof args[number] != 'undefined' ? args[number] : match;
+					});
+				};
+			};
+
+			if (!String.prototype.escape) {
+				String.prototype.escape = function () {
+					return this.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+				};
+			};
+
+			function make_form(desc,empty) {
+				text = '';
+				text += '<div><form method="{0}" action="{1}">'.format(desc.method,desc.action);
+				text += '<h2>{0} {1}</h2>'.format(desc.title,desc.titlesm?'<small>{0}</small>'.format(desc.titlesm):'')
+				for (var i = 0; i < desc.inputs.length; i++) {
+					inp = desc.inputs[i];
+
+					if(empty) {
+						inp.value = ''
+					};
+
+					if (inp.type == 'textarea') {
+						text += '<p>{0}</p><p><textarea name="{1}" cols=50 rows=3>{2}</textarea></p>'
+							.format(inp.desc,inp.name,inp.value.escape())
+					} else {
+						text += '<p>{0} <input name="{1}" type="{2}" value="{3}" /></p>'
+							.format(inp.desc,inp.name,inp.type,String(inp.value).escape());
+						if(inp.img) {
+							text += '<p><a href="{0}"><img src="{0}" height=50 /></a></p>'
+								.format(inp.value);
+						};
+					};
+				};
+				text += '<input type="submit" value="{0}"/>'
+					.format(desc.submittitle);
+				text += '</form></div>'
+				return text;
+			};
+
+			function send_request(method,path,callback)
+			{
+				var xmlhttp = new XMLHttpRequest();
+
+				xmlhttp.onreadystatechange = function() {
+					if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+						var jsonObj = JSON.parse(xmlhttp.responseText);
+						callback(jsonObj);
+						authorized();
+					};
+
+					if(xmlhttp.status == 401) {
+						unauthorized();
+					};
+				};
+
+				xmlhttp.open(method, path, true);
+				xmlhttp.send();
+			};
+
+			function loadClothesInfo() {
+				send_request('GET','/api/v0/cloth/items',lci_cb);
+
+				function lci_cb(obj) {
+					var arr = obj.items;
+					var out = '';
+					for (var i = 0; i < arr.length; i++) {
+						var item = arr[i];
+						var fdesc = {
+							method:'POST',action:'/api/v0/cloth/items/'+item._id,submittitle:'Save!',
+							title:'Item #'+item._id+':',titlesm:'',
+							inputs:[
+								{desc:'Name:',type:'text',name:'description.name',value:item.description.name},
+								{desc:'Description:',type:'textarea',name:'description.description',value:item.description.description},
+								{desc:'Group:',type:'text',name:'description.group',value:item.description.group},
+								{desc:'Image URL:',type:'text',name:'description.img',value:item.description.img,img:true},
+								{desc:'Conditions:',type:'textarea',name:'conditions',value:JSON.stringify(item.conditions)},
+								{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+							]};
+						out += make_form(fdesc);
+						out += '\n<hr />\n';
+					};
+					document.getElementById('container').innerHTML = out;
+				};
+			};
+
+			function loadWeatherInfo() {
+				send_request('GET','/api/v0/weather/cached',lwi_cb);
+
+				function lwi_cb (obj) {
+					arr = obj.records;
+					var out = '';
+					for (var i = 0; i < arr.length; i++) {
+						record = arr[i];
+						var fdesc = {
+							method:'POST',action:'/api/v0/weather/'+record.city_id,submittitle:'Save!',
+							title:'Weather in city '+record.city_id+':',titlesm:'',
+							inputs:[
+								{desc:'Updated:',type:'text',name:'updated',value:record.updated},
+								{desc:'Temperature:',type:'text',name:'state.temperature',value:record.state.temperature},
+								{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:record.state.windVelocity},
+								{desc:'Wind direction:',type:'text',name:'state.windDirection',value:record.state.windDirection},
+								{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:record.state.weatherInWords},
+								{desc:'Humidity:',type:'text',name:'state.humidity',value:record.state.humidity},
+								{desc:'Thumbnail image:',type:'text',name:'state.weatherThumbnailURL',value:record.state.weatherThumbnailURL,img:true},
+								{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+							]
+						};
+						out += make_form(fdesc);
+						out += '\n<hr />\n';
+					};
+					document.getElementById('container').innerHTML = out;
+				};
+			};
+
+			function newWeatherRecord() {
+				var fdesc = {
+					method:'POST',action:'/api/v0/weather',submittitle:'Save!',
+					title:'New weather cache record:',titlesm:'',
+					inputs:[
+						{desc:'City ID:',type:'text',name:'city_id',value:'0'},
+						{desc:'Updated:',type:'text',name:'updated',value:'Sun, 01 Mar 2015 16:02:28 +0000'},
+						{desc:'Temperature:',type:'text',name:'state.temperature',value:'+0'},
+						{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:'100'},
+						{desc:'Wind direction:',type:'text',name:'state.windDirection',value:'SSE'},
+						{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:'Fucking deadly storm.'},
+						{desc:'Humidity:',type:'text',name:'state.humidity',value:'150'},
+						{desc:'Thumbnail image:',type:'text',name:'state.weatherThumbnailURL',value:'img/apocalypse.png'},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function newClothItem() {
+				var fdesc = {
+					method:'POST',action:'/api/v0/cloth/items',submittitle:'Save!',
+					title:'New cloth item:',titlesm:'',
+					inputs:[
+						{desc:'Name:',type:'text',name:'description.name',value:'Шуба'},
+						{desc:'Description:',type:'textarea',name:'description.description',value:'Шубка сшитая подневольными китайцами в московских подвалах из щкурок тысячи жестоко убитых мышек, обитавших там же. Согреет ваше тело и Эго в лютые морозы.'},
+						{desc:'Group:',type:'text',name:'description.group',value:'top'},
+						{desc:'Image URL:',type:'text',name:'description.img',value:'img/cloth/shuba.png'},
+						{desc:'Conditions:',type:'textarea',name:'conditions',value:JSON.stringify([{variable:'temperature',to:0,weight:1}])},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function unauthorized() {
+				var fdesc = {
+					method:'POST', action:'/api/v0/login',submittitle:'Login!',
+					title:'Login form',
+					inputs:[
+						{desc:'Login',type:'text',name:'login',value:''},
+						{desc:'Password',type:'password',name:'password',value:''},
+						{desc:'',type:'hidden',name:'from',value:'/admin.html'}
+					]
+				};
+				document.getElementById('container').innerHTML = make_form(fdesc);
+			};
+
+			function authorized() {
+				document.getElementById('logout_span').innerHTML =
+					'<form action="/api/v0/logout" method="POST"><input type="hidden" name="from" value="/admin.html" /><input type="submit" value="Logout" /></form>';
+			};
+		</script>
+	</head>
+	<body onload='loadWeatherInfo()'>
+		<div>
+			<a href='#' onclick='loadClothesInfo()'>Clothes</a>
+			[<a href='#' onclick='newClothItem()'>new</a>]
+			<a href='#' onclick='loadWeatherInfo()'>Weather</a>
+			[<a href='#' onclick='newWeatherRecord()'>new</a>]
+			<span id='logout_span'></span>
+		</div>
+		<div id='container'>
+		</div>
+	</body>
+</html>
