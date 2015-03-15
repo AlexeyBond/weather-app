@@ -68,7 +68,7 @@
 				$('#weather_thumbnail').attr('src',data.weatherThumbnailURL)
 				$('#weather_temperature').html(data.temperature)
 				$('#weather_temperature_feels_like').html(Math.round(data.temperatureFeelsLike))
-				$('.weather-frame').css('display','inline-block')
+				$('.weather-frame').css('display','table-cell') /*inline-block breaks table into 2 lines on Firefox*/
 
 				$.ajax({
 					url:'/api/v0/cloth/choose',
