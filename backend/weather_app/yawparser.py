@@ -48,7 +48,7 @@ class yandex_weather_parser_handler(xml.sax.ContentHandler):
 def parse_weather_info(city_id,prepared_connection=None):
 	connection = prepared_connection
 	if connection == None:
-		connection = httplib.HTTPConnection(YANDEX_WEATHER_HOST)
+		connection = httplib.HTTPConnection(YANDEX_WEATHER_HOST,timeout=5)
 
 	path = YANDEX_WEATHER_PATH.format(city_id=city_id)
 	connection.request('GET',path)
