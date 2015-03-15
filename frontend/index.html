@@ -1,27 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Test</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
-  </head>
-  <body>
-    <div id="weather-app"></div>
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="bower_components/underscore/underscore-min.js"></script>
-    <script src="bower_components/backbone/backbone.js"></script>
-    <script src="lib/models/WeatherCondition.js"></script>
-    <script src="lib/models/WeatherClothItem.js"></script>
-    <script src="lib/collections/WeatherClothesCollection.js"></script>
-    <script src="lib/views/WeatherPanelView.js"></script>
-    <script src="lib/views/WeatherClothView.js"></script>
-    <script src="lib/views/WeatherClothesView.js"></script>
-    <script src="lib/views/WeatherAppView.js"></script>
-    <!--script src="lib/routers/WeatherRouter.js"></script-->
-    <script>
-      this.weatherAppView = new WeatherApp.WeatherAppView();
-      this.weatherAppView.setElement($('#weather-app')).render(28698);
-    </script>
-  </body>
+	<head>
+		<title>Frontend test</title>
+		<meta charset='UTF-8' />
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=latin,cyrillic-ext,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src='jquery-1.11.2.min.js'></script>
+	</head>
+	<body>
+		<div class='cloth-container'>
+			<img class='loading-animation' src='/img/ajax_loader_gray_350.gif' />
+			<div class='error-message'>
+				<p>
+					<img class='error-message' src='/img/error.png' />
+				</p>
+				<p>
+					Что-то пошло не по плану.
+				</p>
+			</div>
+			<img class='cloth-layer humans' src='/img/humans.png' />
+			<img class='cloth-layer cloth-group-top' src='' />
+		</div>
+		<div id='weather_panel_wrap'>
+			<table id='weather_panel'>
+				<tr>
+					<td class="weather-frame">
+						<div class="weather-tile"><img id='weather_thumbnail' src=''></div>
+						<div class="weather-text"><span id='weather_in_words' class="state" /></div>
+					</td>
+					<td class="weather-frame">
+						<div class="weather-tile"><span class="kartinka" id='weather_temperature' /></div>
+						<div class="weather-text"><span class="state">Температура °С</span></div>
+					</td>
+					<td class="weather-frame">
+						<div class="weather-tile"><span class="kartinka" id='weather_temperature_feels_like' /></div>
+						<div class="weather-text"><span class="state">Ощущается °С</span></div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<script>
+			function on_load_error(data,textStatus,jqXHR) {
+				$('.loading-animation').css('display','none')
+				$('.error-message').css('display','inline-block')
+			};
+			function on_cloth_load(data,textStatus,jqXHR) {
+				$('.cloth-layer').css('display','none')
+				for (var i = data.choise.length - 1; i >= 0; i--) {
+					elem = $('.cloth-group-'+data.choise[i].group);
+					elem.attr('src',data.choise[i].img);
+					elem.css('display','inline-block');
+				};
+				$('.humans').css('display','inline-block')
+				$('.loading-animation').css('display','none')
+			};
+			function on_weather_load(data,textStatus,jqXHR) {
+				$('#weather_in_words').html(data.weatherInWords)
+				$('#weather_thumbnail').attr('src',data.weatherThumbnailURL)
+				$('#weather_temperature').html(data.temperature)
+				$('#weather_temperature_feels_like').html(Math.round(data.temperatureFeelsLike))
+				$('.weather-frame').css('display','inline-block')
+
+				$.ajax({
+					url:'/api/v0/cloth/choose',
+					data:{
+						temperature:data.temperature,
+						windVelocity:data.windVelocity
+					},
+					dataType:'json',
+					success:on_cloth_load,
+					error:on_load_error
+				})
+			};
+			function on_ready() {
+				$.ajax({
+					url:'/api/v0/weather/28698',
+					dataType: 'json',
+					success:on_weather_load,
+					error:on_load_error
+				})
+			};
+			$(document).ready(on_ready);
+		</script>
+	</body>
 </html>
