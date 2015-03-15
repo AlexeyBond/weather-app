@@ -28,11 +28,13 @@ WeatherApp.WeatherAppView = (function(
 
     render: function(id) {
       this.weatherCondition = new WeatherCondition({id: id});
+      this.weatherCondition.fetch();
       this.weatherClothesCollection = new WeatherClothesCollection({
         temperature: this.weatherCondition.get('temperature'),
         windVelocity: this.weatherCondition.get('windVelocity'),
         temperature: this.weatherCondition.get('season'),
       });
+      this.weatherClothesCollection.fetch();
 
       this.weatherPanelView = new WeatherPanelView({model: this.weatherCondition});
       this.weatherClothesView = new WeatherClothesView({collection: this.weatherClothesCollection});

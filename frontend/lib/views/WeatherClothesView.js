@@ -4,7 +4,7 @@ if (window.WeatherApp === undefined) {
 
 WeatherApp.WeatherClothesView = (function() {
   var WeatherClothesView = Backbone.View.extend({
-    tagName: 'div'
+    tagName: 'div',
     id: 'weather-clothes',
 
     initialize: function() {
@@ -22,7 +22,7 @@ WeatherApp.WeatherClothesView = (function() {
     },
 
     addOne: function(clothItem) {
-      var weatherClothView = new WeatherClothView({model: clothItem});
+      var weatherClothView = new WeatherApp.WeatherClothView({model: clothItem});
       this.$el.append(weatherClothView.render().el);
     },
   });

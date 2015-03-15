@@ -11,7 +11,7 @@ WeatherApp.WeatherCondition = (function() {
       windVelocity: '',
       temperatureFeelsLike: '',
       weatherInWords: '',
-      image: '/PNG/simple_weather_icon_00.png',
+      image: '/PNG/simple_weather_icon_01.png',
       clothes: []
     }
   });

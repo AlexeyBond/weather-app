@@ -13,8 +13,8 @@ WeatherApp.WeatherClothView = (function() {
       };
 
       this.css = {
-        position: 'relative';
-        z-index: this.model.zIndex;
+        position: 'relative',
+        'z-index': this.model.zIndex
       };
     },
 

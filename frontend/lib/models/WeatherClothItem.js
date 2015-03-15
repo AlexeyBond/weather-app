@@ -9,5 +9,5 @@ WeatherApp.WeatherClothItem = (function() {
     },
   });
 
-  return WeatherClothItem;
+  return ClothItem;
 })();
