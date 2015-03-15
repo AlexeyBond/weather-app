@@ -10,7 +10,8 @@ WEATHER_STATE_MAP = {
 	'wind_direction':'windDirection',
 	'wind_speed':'windVelocity',
 	'temperature':'temperature',
-	'humidity':'humidity'
+	'humidity':'humidity',
+	'image':'weatherThumbnailURL'
 }
 
 class yandex_weather_parser_handler(xml.sax.ContentHandler):
@@ -39,7 +40,7 @@ class yandex_weather_parser_handler(xml.sax.ContentHandler):
 		self.weather_state['windDirection'] = self.weather_state['windDirection'].upper()
 
 		self.weather_state['temperatureFeelsLike'] = self.weather_state['temperature'] * (1.0 + (self.weather_state['humidity']-50)*0.01*0.5)
-		self.weather_state['weatherThumbnailURL'] = 'img/nope.jpg'
+		self.weather_state['weatherThumbnailURL'] = '/img/wthumb/simple_weather_icon_%02d.png'%(int(self.weather_state['weatherThumbnailURL']))
 
 def parse_weather_info(city_id,prepared_connection=None):
 	connection = prepared_connection
