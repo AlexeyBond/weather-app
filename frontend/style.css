@@ -3,6 +3,15 @@ table {
     margin-right: auto;
 }
 
+#weather-clothes {
+  width: 660px;
+  height: 500px;
+}
+
+#weather-clothes {
+  
+}
+
 #humans {
   background-image: url(background.png);
   margin-left: auto;
