@@ -108,6 +108,7 @@
 							inputs:[
 								{desc:'Updated:',type:'text',name:'updated',value:record.updated},
 								{desc:'Temperature:',type:'text',name:'state.temperature',value:record.state.temperature},
+								{desc:'Temperature (feelz like):',type:'text',name:'state.temperatureFeelsLike',value:record.state.temperatureFeelsLike},
 								{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:record.state.windVelocity},
 								{desc:'Wind direction:',type:'text',name:'state.windDirection',value:record.state.windDirection},
 								{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:record.state.weatherInWords},
@@ -131,6 +132,7 @@
 						{desc:'City ID:',type:'text',name:'city_id',value:'0'},
 						{desc:'Updated:',type:'text',name:'updated',value:'Sun, 01 Mar 2015 16:02:28 +0000'},
 						{desc:'Temperature:',type:'text',name:'state.temperature',value:'+0'},
+						{desc:'Temperature (feelz like):',type:'text',name:'state.temperatureFeelsLike',value:'-0'},
 						{desc:'Wind  speed:',type:'text',name:'state.windVelocity',value:'100'},
 						{desc:'Wind direction:',type:'text',name:'state.windDirection',value:'SSE'},
 						{desc:'Weather in words:',type:'text',name:'state.weatherInWords',value:'Fucking deadly storm.'},
@@ -158,6 +160,29 @@
 				document.getElementById('container').innerHTML = make_form(fdesc);
 			};
 
+			function uploadFile() {
+				var form_html = '<h2>File upload form.</h2><p><form method="POST" id="upload_form" action="/api/v0/uploadfile"><input type="file" name="file" value="" /></form></p><p><button onclick="uploadFileDoUpload()"">Upload!</button></p>';
+				document.getElementById('container').innerHTML = form_html;
+			};
+
+			function uploadFileDoUpload () {
+				form_elem = document.getElementById('upload_form');
+				var request = new XMLHttpRequest();
+				request.open("POST", '/api/v0/uploadfile');
+				request.onreadystatechange = function() {
+					if(request.readyState == 4){
+						if(request.status == 201) {
+							path = request.getResponseHeader('Location')
+							document.getElementById('container').innerHTML = '<p>Upload succeed!</p><p>URL: <input type="text" value="{0}" /></p>'.format(path.escape());
+						} else {
+							document.getElementById('container').innerHTML = '<p>Upload error. Status {0}</p>'.format(request.status);
+						}
+					};
+				};
+				request.send(new FormData(form_elem));
+				document.getElementById('container').innerHTML = '<p>Loading...</p>';
+			};
+
 			function unauthorized() {
 				var fdesc = {
 					method:'POST', action:'/api/v0/login',submittitle:'Login!',
@@ -183,6 +208,7 @@
 			[<a href='#' onclick='newClothItem()'>new</a>]
 			<a href='#' onclick='loadWeatherInfo()'>Weather</a>
 			[<a href='#' onclick='newWeatherRecord()'>new</a>]
+			<a href='#' onclick='uploadFile()'>Upload file...</a>
 			<span id='logout_span'></span>
 		</div>
 		<div id='container'>

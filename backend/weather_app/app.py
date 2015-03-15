@@ -10,6 +10,10 @@ import traceback
 
 import uuid
 
+import os
+
+import werkzeug
+
 from functools import wraps
 
 DB_URI =	'mongodb://localhost:27017/'
@@ -262,6 +266,7 @@ def weathercache_post(city_id=0):
 	postrecord['city_id'] = city_id
 	postrecord['updated'] = datetime.datetime.strptime(request.form['updated'],"%a, %d %b %Y %H:%M:%S +0000")
 	postrecord['state']['temperature'] = float(request.form['state.temperature'])
+	postrecord['state']['temperatureFeelsLike'] = float(request.form['state.temperatureFeelsLike'])
 	postrecord['state']['windVelocity'] = float(request.form['state.windVelocity'])
 	postrecord['state']['windDirection'] = request.form['state.windDirection']
 	postrecord['state']['weatherInWords'] = request.form['state.weatherInWords']
@@ -334,7 +339,26 @@ def weathercache_get():
 		rec['updated'] = rec['updated'].strftime("%a, %d %b %Y %H:%M:%S +0000")
 	return jsonify({'records':records})
 
+UPLOAD_DIRECTORY = os.environ.get('UPLOAD_DIRECTORY','../frontend/uploads')
+UPLOAD_BASEURL = os.environ.get('UPLOAD_BASEURL','/uploads')
 
+@app.route('/api/v0/uploadfile',methods=['POST'])
+@requiresAuthentication
+def uploadFile():
+	_file = request.files['file']
+	filename = _file.filename
+	filename = werkzeug.utils.secure_filename(filename)
+	filepath = os.path.join(UPLOAD_DIRECTORY,filename)
+	counter = 0
+	while os.path.isfile(filepath):
+		filepath = os.path.join(UPLOAD_DIRECTORY,'({counter}) {filename}'.format(**locals()))
+		counter += 1
+
+	_file.save(filepath)
+
+	fileurl = UPLOAD_BASEURL+filepath[len(UPLOAD_DIRECTORY):]
+
+	return Response('{}',mimetype='application/json',status=201,headers={'Location':fileurl})
 
 if __name__ == '__main__':
 	app.run( )
