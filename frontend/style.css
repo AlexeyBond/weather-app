@@ -98,6 +98,7 @@ body {
 
 .humans {
 	display: none;
+	z-index: 1;
 }
 
 .cloth-layer {
@@ -108,7 +109,36 @@ body {
 	top: 0;
 	left: 0;
 }
+/*
+ * Группы одежды:
+ * top - Торс
+ * head - Головной убор
+ * hands - Руки
+ * legs - Ноги
+ * shoes - Обувь
+ * something - Акссесуары
+ */
 
 .cloth-group-top {
-	z-index: 100;
+	z-index: 20;
+}
+
+.cloth-group-head {
+	z-index: 30;
+}
+
+.cloth-group-hands {
+	z-index: 40;
+}
+
+.cloth-group-legs {
+	z-index: 10;
+}
+
+.cloth-group-shoes {
+	z-index: 50;
+}
+
+.cloth-group-something {
+	z-index: 60;
 }
