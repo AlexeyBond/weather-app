@@ -8,6 +8,7 @@
 #weather_panel_wrap {
 	width: 100%;
 	background-color: #7ae269;
+	opacity: 0.8;
 }
 
 .weather-frame {
@@ -79,8 +80,8 @@ body {
 
 .cloth-container {
 	position: relative;
-	width: 1280px;
-	height: 644px;
+	width: 420px;
+	height: 566px;
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
@@ -119,26 +120,50 @@ body {
  * something - Акссесуары
  */
 
-.cloth-group-top {
+.cloth-group-girl-top {
 	z-index: 20;
 }
 
-.cloth-group-head {
+.cloth-group-girl-head {
 	z-index: 30;
 }
 
-.cloth-group-hands {
+.cloth-group-girl-hands {
 	z-index: 40;
 }
 
-.cloth-group-legs {
+.cloth-group-girl-legs {
 	z-index: 10;
 }
 
-.cloth-group-shoes {
+.cloth-group-girl-shoes {
 	z-index: 50;
 }
 
-.cloth-group-something {
+.cloth-group-girl-something {
 	z-index: 60;
+}
+
+.cloth-group-boy-top {
+	z-index: 25;
+}
+
+.cloth-group-boy-head {
+	z-index: 35;
+}
+
+.cloth-group-boy-hands {
+	z-index: 45;
+}
+
+.cloth-group-boy-legs {
+	z-index: 15;
+}
+
+.cloth-group-boy-shoes {
+	z-index: 55;
+}
+
+.cloth-group-boy-something {
+	z-index: 65;
 }
