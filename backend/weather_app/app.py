@@ -98,9 +98,8 @@ def cloth_getitem(item_id=''):
 	return jsonify(item)
 
 def check_item_condition(cond,context):
-	value = context.get(cond.get('value',''),'0')
+	value = context.get(str(cond.get('value',cond.get('variable',''))),'0')
 	cond_ok = True
-
 	if 'is' in cond:
 		cond_ok = cond_ok and (str(value) == cond['is'])
 
@@ -119,7 +118,6 @@ def calc_item_weight(item,context):
 
 	for cond in conditions:
 		weight += cond.get('weight',0.0) * (1.0 if check_item_condition(cond,context) else 0.0)
-
 	return weight
 
 @app.route('/api/v0/cloth/choose',methods=['GET'])
@@ -128,6 +126,7 @@ def cloth_choose():
 	context['temperature'] = float(request.args.get('temperature',0))
 	context['windVelocity'] = float(request.args.get('windVelocity',0))
 	context['season'] = request.args.get('season','')
+
 
 	itemgroups = {}
 
