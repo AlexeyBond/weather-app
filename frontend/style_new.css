@@ -1,0 +1,180 @@
+#weather_panel {
+	width: 100%;
+	height: 80px;
+/*	margin-left: auto;
+	margin-right: auto;*/
+}
+
+#weather_panel_wrap {
+	width: 100%;
+	background-color: #7ae269;
+	opacity: 0.8;
+}
+
+.weather-frame {
+	position: static;
+	height: 100%;
+	width: 33.3%;
+	display: inline-block;
+	margin: 0 auto;
+	padding: 0;
+	text-align: center;
+	display: none;
+}
+
+.weather-tile {
+	width: 200px;
+	height: 200px;
+	line-height: 180px;
+	position: static;
+	margin-top: 20px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-down: 10px;
+	display: inline-block;
+	text-align: center;
+	font-size: 100px;
+	color: #000000;
+}
+
+.weather-text {
+	width:100%;
+	display: inline-block;
+	line-height: normal;
+	position: relative;
+	text-align: center;
+	height: 50px;
+	line-height: 40px;
+	font-size: 22px;
+	color: #000000;
+}
+
+.state {
+	font-family: 'Roboto', sans-serif;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+	color: #333333;
+}
+
+.kartinka {
+	font-family: 'Roboto', sans-serif;
+	font-weight: bold;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+	color: #333333;
+}
+
+#weather_thumbnail {
+	width: 130px;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+}
+html, body{
+	height: 100%;
+}
+
+body{
+	background: url(img/background.png) repeat-x;
+	background-position: center;
+	background-size: auto 150%;	
+	margin: 0px;
+}
+
+.loading-animation {
+	z-index: 10;
+	width: 100px;
+	opacity: 0.6;
+}
+
+.error-message {
+	display: none;
+}
+
+.humans {
+	/*display: none;*/
+	z-index: 1;
+}
+.cloth-container{
+	background-position: center;
+	background-size: auto 100%;
+	height: 100%;
+	text-align: center;
+	position: relative;
+	
+}
+
+.cloth-container img{
+	display: block;
+	margin: 0 auto;
+	max-width: 90%;
+	max-height: 90%;
+	top: 10%;
+	bottom: 10%;
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+.cloth-layer{
+	
+}
+/*
+ * Группы одежды:
+ * top - Торс
+ * head - Головной убор
+ * hands - Руки
+ * legs - Ноги
+ * shoes - Обувь
+ * something - Акссесуары
+ */
+
+.cloth-group-girl-top {
+	z-index: 20;
+}
+
+.cloth-group-girl-head {
+	z-index: 30;
+}
+
+.cloth-group-girl-hands {
+	z-index: 40;
+}
+
+.cloth-group-girl-legs {
+	z-index: 10;
+}
+
+.cloth-group-girl-shoes {
+	z-index: 50;
+}
+
+.cloth-group-girl-something {
+	z-index: 60;
+}
+
+.cloth-group-boy-top {
+	z-index: 25;
+}
+
+.cloth-group-boy-head {
+	z-index: 35;
+}
+
+.cloth-group-boy-hands {
+	z-index: 45;
+}
+
+.cloth-group-boy-legs {
+	z-index: 15;
+}
+
+.cloth-group-boy-shoes {
+	z-index: 55;
+}
+
+.cloth-group-boy-something {
+	z-index: 65;
+}
