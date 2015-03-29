@@ -1,3 +1,17 @@
+
+#city_select_bar {
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	opacity: 0.7;
+	z-index: 200;
+
+	background-color: green;
+
+	display: none;
+}
+
 #weather_panel {
 	width: 660px;
 	height: 272px;
@@ -76,6 +90,9 @@
 body {
 	background-image: url(/img/background.png);
 	background-size: cover;
+	margin-left: 0;
+	margin-right: 0;
+	margin-bottom: 0;
 }
 
 .cloth-container {

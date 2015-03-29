@@ -2,6 +2,7 @@ from flask import *
 import pymongo
 import bson
 import json
+import jsonschema
 
 import yawparser
 
@@ -85,14 +86,16 @@ def weather(city_id=None):
 
 	return jsonify(weather_state)
 
-@app.route('/api/v0/cloth/items/<int:item_id>',methods=['GET'])
-def cloth_getitem(item_id=0):
-	item = db.cloth_items.find_one({'id':int(item_id)})
+@app.route('/api/v0/cloth/items/<item_id>',methods=['GET'])
+def cloth_getitem(item_id=''):
+	item = db.cloth_items.find_one({'_id':bson.ObjectId(item_id)})
 
 	if item == None:
 		return Response('{}',mimetype='application/json',status=404)
 
-	return jsonify(item.get('description',{}))
+	del item['_id']
+
+	return jsonify(item)
 
 def check_item_condition(cond,context):
 	value = context.get(cond.get('value',''),'0')
@@ -150,6 +153,13 @@ def cloth_choose():
 	print '>>>> ',str(choosen)
 
 	return jsonify({'choise':choosen})
+
+### Cities DB
+
+@app.route('/api/v0/cities',methods=['GET'])
+def cities_getlist():
+	cities = db.clities_list.find_one()
+	return jsonify(cities)
 
 ### API Calls for debugging/administration
 
@@ -221,7 +231,32 @@ def logout():
 
 @app.route('/api/v0/cloth/items',methods=['POST'])
 def cloth_post_new():
-	return cloth_postitem(None)
+	if request.headers['Content-Type'] in ('application/x-www-form-urlencoded','multipart/form-data'):
+		return cloth_postitem_form(None)
+	return cloth_putitem(None)
+
+@app.route('/api/v0/cloth/items/<item_id>',methods=['PUT'])
+@requiresAuthentication
+def cloth_putitem(item_id=None):
+	if request.headers['Content-Type'] not in ('application/json',):
+		abort(401)
+	jsobj = request.get_json()
+	jsobj['_id'] = None
+	jsscheme = get_collection_scheme('cloth_items')
+	try:
+		jsonschema.validate(jsobj,jsscheme);
+	except Exception as e:
+		return Response(json.dumps({'status':'Validation failed','exception':str(e)}),status=400,mimetype='application/json')
+	if item_id != None:
+		jsobj['_id'] = bson.ObjectId(item_id)
+		db.cloth_items.save(jsobj)
+	else:
+		if '_id' in jsobj:
+			del jsobj['_id']
+		jsobj['_id'] = db.cloth_items.insert(jsobj)
+	resp = jsonify({'status':'OK'})
+	resp.headers['Location'] = '/api/v0/cloth/items/' + str(jsobj['_id'])
+	return resp
 
 @app.route('/api/v0/cloth/items.schema',methods=['GET'])
 def cloth_item_schema():
@@ -229,7 +264,7 @@ def cloth_item_schema():
 
 @app.route('/api/v0/cloth/items/<item_id>',methods=['POST'])
 @requiresAuthentication
-def cloth_postitem(item_id=None):
+def cloth_postitem_form(item_id=None):
 	postitem = {'description':{}}
 
 	if item_id != None:
@@ -309,9 +344,9 @@ def cloth_getitems():
 		else:
 			abort(400)
 
-	if 'page' in request.args:
+	if 'page' in request.args or 'count' in request.args:
 		try:
-			page = int(request.args['page'])
+			page = int(request.args.get('page',1))
 
 			if page < 1:
 				page = 1
@@ -320,6 +355,9 @@ def cloth_getitems():
 
 			if count <= 0:
 				count = 10
+
+			if count > 100:
+				count = 100
 
 			qres = qres.skip(count*(page-1)).limit(count)
 		except:

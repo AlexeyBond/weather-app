@@ -8,6 +8,9 @@
 		<script type="text/javascript" src='jquery-1.11.2.min.js'></script>
 	</head>
 	<body>
+		<div id='city_select_bar'>
+			<select id='city_selector'></select>
+		</div>
 		<div class='cloth-container'>
 			<img class='loading-animation' src='/img/ajax_loader_gray_350.gif' />
 			<div class='error-message'>
@@ -41,26 +44,34 @@
 			<table id='weather_panel'>
 				<tr>
 					<td class="weather-frame">
-						<div class="weather-tile"><img id='weather_thumbnail' src=''></div>
 						<div class="weather-text"><span id='weather_in_words' class="state" /></div>
+						<div class="weather-tile"><img id='weather_thumbnail' src=''></div>
 					</td>
 					<td class="weather-frame">
-						<div class="weather-tile"><span class="kartinka" id='weather_temperature' /></div>
 						<div class="weather-text"><span class="state">Температура °С</span></div>
+						<div class="weather-tile"><span class="kartinka" id='weather_temperature' /></div>
 					</td>
 					<td class="weather-frame">
-						<div class="weather-tile"><span class="kartinka" id='weather_temperature_feels_like' /></div>
 						<div class="weather-text"><span class="state">Ощущается °С</span></div>
+						<div class="weather-tile"><span class="kartinka" id='weather_temperature_feels_like' /></div>
 					</td>
 				</tr>
 			</table>
 		</div>
 		<script>
+			var city_id = 28698;
+			function show_city_bar() {
+				$('#city_select_bar').css('display','inline-block')
+			};
+			function hide_city_bar() {
+				$('#city_select_bar').css('display','none')
+			};
 			function on_load_error(data,textStatus,jqXHR) {
 				$('.loading-animation').css('display','none')
 				$('.error-message').css('display','inline-block')
 			};
 			function on_cloth_load(data,textStatus,jqXHR) {
+				$('.humans').css('display','none')
 				$('.cloth-layer').css('display','none')
 				for (var i = data.choise.length - 1; i >= 0; i--) {
 					elem = $('.cloth-group-'+data.choise[i].group);
@@ -69,6 +80,8 @@
 				};
 				$('.humans').css('display','inline-block')
 				$('.loading-animation').css('display','none')
+
+				show_city_bar( );
 			};
 			function on_weather_load(data,textStatus,jqXHR) {
 				$('#weather_in_words').html(data.weatherInWords)
@@ -88,13 +101,42 @@
 					error:on_load_error
 				})
 			};
-			function on_ready() {
+			function load_weather() {
+				hide_city_bar( );
 				$.ajax({
-					url:'/api/v0/weather/28698',
+					url:'/api/v0/weather/'+city_id,
 					dataType: 'json',
 					success:on_weather_load,
 					error:on_load_error
-				})
+				});
+			};
+			function on_city_select() {
+				var selected = $('#city_selector option:selected');
+				city_id = selected.val();
+				load_weather( );
+			};
+			function on_cities_load(data,textStatus,jqXHR) {
+				var selector = $('#city_selector');
+				for (var i = data.list.length - 1; i >= 0; i--) {
+					var city = data.list[i];
+					var a = '';
+					if (city.id == city_id) {
+						a = 'selected';
+					};
+					selector.append( $('<option value="'+city.id+'" '+a+'>'+city.country+', '+city.name+'</option>'));
+				};
+				$('#city_selector').change(on_city_select);
+			};
+			function load_cities( ) {
+				$.ajax({
+					url:'/static/cities.json',
+					dataType: 'json',
+					success: on_cities_load
+				});
+			}
+			function on_ready() {
+				load_weather(city_id);
+				load_cities( );
 			};
 			$(document).ready(on_ready);
 		</script>
