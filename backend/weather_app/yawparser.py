@@ -38,6 +38,7 @@ class yandex_weather_parser_handler(xml.sax.ContentHandler):
 		self.weather_state['humidity'] = float(self.weather_state['humidity'])
 		self.weather_state['windVelocity'] = float(self.weather_state['windVelocity'])
 		self.weather_state['windDirection'] = self.weather_state['windDirection'].upper()
+		self.weather_state['weatherInWords'] = self.weather_state['weatherInWords'][0].upper() + self.weather_state['weatherInWords'][1:]
 
 		self.weather_state['temperatureFeelsLike'] = self.weather_state['temperature'] * (1.0 + (self.weather_state['humidity']-50)*0.01*0.5)
 		try:

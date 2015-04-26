@@ -11,54 +11,59 @@
 		<div id='city_select_bar'>
 			<select id='city_selector'></select>
 		</div>
-		<div class='cloth-container'>
-			<img class='loading-animation' src='/img/ajax_loader_gray_350.gif' />
-			<div class='error-message'>
-				<p>
-					<img class='error-message' src='/img/error.png' />
-				</p>
-				<p>
-					Что-то пошло не по плану.
-				</p>
+		<div class='content-wrapper'>
+			<div class='cloth-container-wrapper'>
+				<div class='cloth-container'>
+					<img class='loading-animation' src='/img/ajax_loader_gray_350.gif' />
+					<div class='error-message'>
+						<p>
+							<img class='error-message' src='/img/error.png' />
+						</p>
+						<p>
+							Что-то пошло не по плану.
+						</p>
+					</div>
+					<noscript>
+						<p>На самом деле ничего не происходит.</p>
+						<p>Уходи от сюда или воспользуйся браузером с потдержкой JavaScript.</p>
+					</noscript>
+					<img class='cloth-layer humans' src='/img/humans.png' />
+					<img class='cloth-layer cloth-group-girl-top' src='' />
+					<img class='cloth-layer cloth-group-girl-head' src='' />
+					<img class='cloth-layer cloth-group-girl-hands' src='' />
+					<img class='cloth-layer cloth-group-girl-legs' src='' />
+					<img class='cloth-layer cloth-group-girl-shoes' src='' />
+					<img class='cloth-layer cloth-group-girl-something' src='' />
+					
+					<img class='cloth-layer cloth-group-boy-top' src='' />
+					<img class='cloth-layer cloth-group-boy-head' src='' />
+					<img class='cloth-layer cloth-group-boy-hands' src='' />
+					<img class='cloth-layer cloth-group-boy-legs' src='' />
+					<img class='cloth-layer cloth-group-boy-shoes' src='' />
+					<img class='cloth-layer cloth-group-boy-something' src='' />
+				</div>
 			</div>
-			<noscript>
-				<p>На самом деле ничего не происходит.</p>
-				<p>Уходи от сюда или воспользуйся браузером с потдержкой JavaScript.</p>
-			</noscript>
-			<img class='cloth-layer humans' src='/img/humans.png' />
-			<img class='cloth-layer cloth-group-girl-top' src='' />
-			<img class='cloth-layer cloth-group-girl-head' src='' />
-			<img class='cloth-layer cloth-group-girl-hands' src='' />
-			<img class='cloth-layer cloth-group-girl-legs' src='' />
-			<img class='cloth-layer cloth-group-girl-shoes' src='' />
-			<img class='cloth-layer cloth-group-girl-something' src='' />
-			
-			<img class='cloth-layer cloth-group-boy-top' src='' />
-			<img class='cloth-layer cloth-group-boy-head' src='' />
-			<img class='cloth-layer cloth-group-boy-hands' src='' />
-			<img class='cloth-layer cloth-group-boy-legs' src='' />
-			<img class='cloth-layer cloth-group-boy-shoes' src='' />
-			<img class='cloth-layer cloth-group-boy-something' src='' />
-		</div>
-		<div id='weather_panel_wrap'>
-			<table id='weather_panel'>
-				<tr>
-					<td class="weather-frame">
-						<div class="weather-text"><span id='weather_in_words' class="state" /></div>
-						<div class="weather-tile"><img id='weather_thumbnail' src=''></div>
-					</td>
-					<td class="weather-frame">
-						<div class="weather-text"><span class="state">Температура °С</span></div>
-						<div class="weather-tile"><span class="kartinka" id='weather_temperature' /></div>
-					</td>
-					<td class="weather-frame">
-						<div class="weather-text"><span class="state">Ощущается °С</span></div>
-						<div class="weather-tile"><span class="kartinka" id='weather_temperature_feels_like' /></div>
-					</td>
-				</tr>
-			</table>
+			<div id='weather_panel_wrap'>
+				<table id='weather_panel'>
+					<tr>
+						<td class="weather-frame">
+							<div class="weather-text"><span id='weather_in_words' class="state" /></div>
+							<div class="weather-tile"><img id='weather_thumbnail' src=''></div>
+						</td>
+						<td class="weather-frame">
+							<div class="weather-text"><span class="state">Температура °С</span></div>
+							<div class="weather-tile"><span class="kartinka" id='weather_temperature' /></div>
+						</td>
+						<td class="weather-frame">
+							<div class="weather-text"><span class="state">Ощущается °С</span></div>
+							<div class="weather-tile"><span class="kartinka" id='weather_temperature_feels_like' /></div>
+						</td>
+					</tr>
+				</table>
+			</div>
 		</div>
 		<script>
+			var img_proportion = (420/556);
 			var city_id = 28698;
 			function show_city_bar() {
 				$('#city_select_bar').css('display','inline-block')
@@ -134,9 +139,23 @@
 					success: on_cities_load
 				});
 			}
+			function on_window_resize( ) {
+				var wnd = $(window);
+				var cwr = $('.content-wrapper');
+				var cco = $('.cloth-container');
+				var wpw = $('#weather_panel_wrap');
+				var h = wnd.height();
+				var w = wnd.width();
+				cwr.height(h);
+				cwr.width(w);
+				cco.height(h-272);
+				cco.width(cco.height()*img_proportion)
+			}
 			function on_ready() {
 				load_weather(city_id);
 				load_cities( );
+
+				$(window).on('resize',on_window_resize).trigger('resize');
 			};
 			$(document).ready(on_ready);
 		</script>
