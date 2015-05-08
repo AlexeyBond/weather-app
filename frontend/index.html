@@ -6,8 +6,33 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=latin,cyrillic-ext,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
 		<script type="text/javascript" src='jquery-1.11.2.min.js'></script>
+		<script src="jquery.backgroundPosition.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			$(function(){
+			
+			  	$('.mid-clouds').css({backgroundPosition: '0px 0px'});
+			  	$('.fore-clouds').css({backgroundPosition: '0px 0px'});
+				$('.back-clouds').css({backgroundPosition: '0px 0px'});
+			
+				$('.mid-clouds').animate({
+					backgroundPosition:"(-10000px -2000px)"
+				}, 240000, 'linear');
+				
+				$('.fore-clouds').animate({
+					backgroundPosition:"(-10000px -2000px)"
+				}, 120000, 'linear');
+				
+				$('.back-clouds').animate({
+					backgroundPosition:"(-10000px -2000px)"
+				}, 480000, 'linear');
+				
+			});
+		</script>
 	</head>
 	<body>
+		<div class='back-clouds'></div>
+		<div class='mid-clouds'></div>
+		<div class='fore-clouds'></div>
 		<div id='city_select_bar'>
 			<select id='city_selector'></select>
 		</div>

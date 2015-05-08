@@ -100,12 +100,40 @@ body {
 	height: 100%;
 }
 
+.back-clouds {
+	background: url(/img/clouds_far.png) repeat 5% 5%;
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	z-index: 100;
+}
+
+.mid-clouds {
+	background: url(/img/clouds_mid.png) repeat 20% 20%;
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	z-index: 200;
+}
+
+.fore-clouds {
+	background: url(/img/clouds_fore.png) repeat 90% 110%;
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	z-index: 300;
+}
+
 .cloth-container-wrapper {
-	background-image: url(/img/background.png);
+	background:
+	url(/img/background_main.png) center bottom,
+	/*
+	url(/img/clouds_nearest.png) center bottom,
+	url(/img/clouds_far.png) center bottom,*/
+	url(/img/sky_clear.png) center bottom;
 	background-size: cover;
-	background-position-y: bottom;
-	background-position-x: center;
 	width: 100%;
+	/*
+	background-image: url(/img/background.png);11
+	background-position-y: bottom;
+	background-position-x: center;*/
 }
 
 .cloth-container {
