@@ -91,7 +91,7 @@
 }
 
 body {
-	background-color: #9999FF;
+	background-color: #69cefa;
 	margin: 0;
 	overflow: hidden;
 }
@@ -115,13 +115,6 @@ body {
 	position: absolute;
 	top: 0; left: 0; right: 0; bottom: 0;
 	z-index: -3;
-}
-
-.mid-clouds {
-	background: url(/img/clouds_mid.png) repeat 20% 20%;
-	position: absolute;
-	top: 0; left: 0; right: 0; bottom: 0;
-	z-index: -2;
 }
 
 .fore-clouds {

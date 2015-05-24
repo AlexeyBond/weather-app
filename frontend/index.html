@@ -10,7 +10,6 @@
 	</head>
 	<body>
 		<div class='back-clouds'></div>
-		<div class='mid-clouds'></div>
 		<div class='fore-clouds'></div>
 		<div id='city_select_bar'>
 			<select id='city_selector'></select>
@@ -112,15 +111,48 @@
 
 				show_city_bar( );
 			};
+			function setTimeTheme(date){
+				var wpw = $('#weather_panel_wrap');
+				var wpw_color;
+				var ccw = $('.cloth-container-wrapper');
+				var ccw_background;
+				if (season(date)==0){
+					ccw_background = 'spring';
+					wpw_color='#07bc50';				
+				}else if (season(date)==1){
+					ccw_background = 'summer';
+					wpw_color='#4dc740';
+				}else if (season(date)==2){
+					ccw_background = 'autumn';
+					wpw_color='#ecb717';
+				}else if (season(date)==3){
+					ccw_background = 'winter';
+					wpw_color='#aae2fc';		
+				};
+				if(isNight(date)){
+					ccw_background +='_night.png';
+					$(document.body).css('background-color','#002455');
+					$('.back-clouds').css('background','url(/img/clouds_far_night.png) repeat 5% 5%');
+					$('.fore-clouds').css('background','url(/img/clouds_fore_night.png) repeat 90% 110%');
+				}else{
+					ccw_background +='_day.png';
+				};
+				ccw.css('background','url(/img/'+ccw_background+') center bottom');
+				ccw.css('background-size','cover');
+				wpw.css('background-color',wpw_color);
+				
+			};
 			function on_weather_load(data,textStatus,jqXHR) {
-				$('#weather_in_words').html(data.weatherInWords)
-				$('#weather_thumbnail').attr('src',data.weatherThumbnailURL)
-				$('#weather_temperature').html(data.temperature)
-				$('#weather_temperature_feels_like').html(Math.round(data.temperatureFeelsLike))
-				$('.weather-frame').css('display','table-cell') /*inline-block breaks table into 2 lines on Firefox*/
 
-				wind($('.back-clouds'),data.windVelocity/40);
-				wind($('.mid-clouds'),data.windVelocity/30);
+				$('#weather_in_words').html(data.weatherInWords)
+				$('#weather_thumbnail').attr('src',data.weatherThumbnailURL);
+				$('#weather_temperature').html(data.temperature);
+				$('#weather_temperature_feels_like').html(Math.round(data.temperatureFeelsLike));
+				$('.weather-frame').css('display','table-cell'); /*inline-block breaks table into 2 lines on Firefox*/
+
+				var today = new Date();
+				setTimeTheme(today);
+				wind($('.back-clouds'),data.windVelocity/30);
 				wind($('.fore-clouds'),data.windVelocity/20);
 
 				$.ajax({
@@ -206,6 +238,7 @@
 					show_description();
 				});
 			};
+
 			$(document).ready(on_ready);
 		</script>
 	</body>
