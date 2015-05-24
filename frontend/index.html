@@ -17,6 +17,14 @@
 		</div>
 		<div class='content-wrapper'>
 			<div class='cloth-container-wrapper'>
+				<div class='cloth-description-boy'>
+					<div class='cloth-description-group-boy-top'></div>
+					<div class='cloth-description-group-boy-head'></div>
+					<div class='cloth-description-group-boy-hands'></div>
+					<div class='cloth-description-group-boy-legs'></div>
+					<div class='cloth-description-group-boy-shoes'></div>
+					<div class='cloth-description-group-boy-something'></div>
+				</div>
 				<div class='cloth-container'>
 					<img class='loading-animation' src='/img/ajax_loader_gray_350.gif' />
 					<div class='error-message'>
@@ -29,7 +37,7 @@
 					</div>
 					<noscript>
 						<p>На самом деле ничего не происходит.</p>
-						<p>Уходи от сюда или воспользуйся браузером с потдержкой JavaScript.</p>
+						<p>Уходи от сюда или воспользуйся браузером с поддержкой JavaScript.</p>
 					</noscript>
 					<img class='cloth-layer humans' src='/img/humans.png' />
 					<img class='cloth-layer cloth-group-girl-top' src='' />
@@ -45,6 +53,14 @@
 					<img class='cloth-layer cloth-group-boy-legs' src='' />
 					<img class='cloth-layer cloth-group-boy-shoes' src='' />
 					<img class='cloth-layer cloth-group-boy-something' src='' />
+				</div>
+				<div class='cloth-description-girl'>
+					<div class='cloth-description-group-girl-top'></div>
+					<div class='cloth-description-group-girl-head'></div>
+					<div class='cloth-description-group-girl-hands'></div>
+					<div class='cloth-description-group-girl-legs'></div>
+					<div class='cloth-description-group-girl-shoes'></div>
+					<div class='cloth-description-group-girl-something'></div>
 				</div>
 			</div>
 			<div id='weather_panel_wrap'>
@@ -69,6 +85,7 @@
 		<script>
 			var img_proportion = (420/556);
 			var city_id = 28698;
+			var description_visible=false;
 			function show_city_bar() {
 				$('#city_select_bar').css('display','inline-block')
 			};
@@ -84,6 +101,9 @@
 				$('.cloth-layer').css('display','none')
 				for (var i = data.choise.length - 1; i >= 0; i--) {
 					elem = $('.cloth-group-'+data.choise[i].group);
+					desc_elem = $('.cloth-description-group'+data.choise[i].group);
+					desc_elem.prepend('<img src='+data.choise[i].img+'/>');
+					desc_elem.prepend('<p>' + data.choise[i].name + '</p>');
 					elem.attr('src',data.choise[i].img);
 					elem.css('display','inline-block');
 				};
@@ -161,13 +181,30 @@
 				cwr.height(h);
 				cwr.width(w);
 				cco.height(h-272);
-				cco.width(cco.height()*img_proportion)
+				cco.width(cco.height()*img_proportion);
+				$('.cloth-description-boy').height(cco.height());
+				$('.cloth-description-girl').height(cco.height());
+			}
+			function show_description(){
+				if (description_visible){
+					$('.cloth-description-girl').css('opacity','0');
+					$('.cloth-description-boy').css('opacity','0');
+					description_visible = false;
+				}else{
+					$('.cloth-description-girl').css('opacity','0.5');
+					$('.cloth-description-boy').css('opacity','0.5');
+					description_visible = true;
+				}
 			}
 			function on_ready() {
 				load_weather(city_id);
 				load_cities( );
 
 				$(window).on('resize',on_window_resize).trigger('resize');
+
+				$('.cloth-container-wrapper').click(function(){
+					show_description();
+				});
 			};
 			$(document).ready(on_ready);
 		</script>
