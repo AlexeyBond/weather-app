@@ -7,14 +7,6 @@
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=latin,cyrillic-ext,latin-ext,cyrillic' rel='stylesheet' type='text/css'>
 		<script type="text/javascript" src='jquery-1.11.2.min.js'></script>
 		<script src="myShittyParallax.js" type="text/javascript"></script>
-		<script type="text/javascript">
-			$(function(){
-				var windSpeed = 0.1;
-				wind($('.back-clouds'),windSpeed*0.6);
-				wind($('.mid-clouds'),windSpeed);
-				wind($('.fore-clouds'),windSpeed*1.4);
-			});
-		</script>
 	</head>
 	<body>
 		<div class='back-clouds'></div>
@@ -107,6 +99,10 @@
 				$('#weather_temperature_feels_like').html(Math.round(data.temperatureFeelsLike))
 				$('.weather-frame').css('display','table-cell') /*inline-block breaks table into 2 lines on Firefox*/
 
+				wind($('.back-clouds'),data.windVelocity/40);
+				wind($('.mid-clouds'),data.windVelocity/30);
+				wind($('.fore-clouds'),data.windVelocity/20);
+
 				$.ajax({
 					url:'/api/v0/cloth/choose',
 					data:{
@@ -142,6 +138,9 @@
 					};
 					selector.append( $('<option value="'+city.id+'" '+a+'>'+city.country+', '+city.name+'</option>'));
 				};
+				selector.html($("#city_selector option").sort(function (a, b) {
+				    return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
+				}))
 				$('#city_selector').change(on_city_select);
 			};
 			function load_cities( ) {
@@ -150,6 +149,7 @@
 					dataType: 'json',
 					success: on_cities_load
 				});
+
 			}
 			function on_window_resize( ) {
 				var wnd = $(window);
