@@ -1,11 +1,14 @@
+# Файл настроек nginx
 server
 {
 	listen 80 default_server;
 	index frontend/index.html;
 	location / {
+		# Локация статических файлов
 		root /srv/www;
 	}
 	location /api/ {
+		# Прокси на наш RestAPI
 		proxy_pass http://localhost:8888;
 	}
 }

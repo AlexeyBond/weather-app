@@ -41,4 +41,6 @@ sax_handler = yandex_cities_list_parser_handler( )
 parser.setContentHandler(sax_handler)
 parser.parse(sys.stdin)
 
+sax_handler.doc['list'].sort()
+
 db.clities_list.save(sax_handler.doc)

@@ -85,33 +85,42 @@
 			var img_proportion = (420/556);
 			var city_id = 28698;
 			var description_visible=false;
+			// функция отображает список городов
 			function show_city_bar() {
 				$('#city_select_bar').css('display','inline-block')
 			};
+			// функция скрывает список городов
 			function hide_city_bar() {
 				$('#city_select_bar').css('display','none')
 			};
+			// отобразить сообщиение об ошибке (и грустный смайлик)
 			function on_load_error(data,textStatus,jqXHR) {
 				$('.loading-animation').css('display','none')
 				$('.error-message').css('display','inline-block')
 			};
+			// вызывается когда загружена одежда. 
 			function on_cloth_load(data,textStatus,jqXHR) {
 				$('.humans').css('display','none')
 				$('.cloth-layer').css('display','none')
+				// для каждого элемента одежды...
 				for (var i = data.choise.length - 1; i >= 0; i--) {
 					elem = $('.cloth-group-'+data.choise[i].group);
 					desc_elem = $('.cloth-description-group-'+data.choise[i].group);
 					desc_elem.empty();
+					// добавление к DOM-дерву новых элементов
 					desc_elem.prepend('<img src="'+data.choise[i].img+'"/>');
 					desc_elem.prepend('<p>' + data.choise[i].name + '</p>');
 					elem.attr('src',data.choise[i].img);
 					elem.css('display','inline-block');
 				};
+				// показываем человеков и убираем заставку загрузки
 				$('.humans').css('display','inline-block')
 				$('.loading-animation').css('display','none')
 
 				show_city_bar( );
 			};
+			// метод приниманет дату, устанавливает оформление
+			// в соответсвии с временем года и суток
 			function setTimeTheme(date){
 				var wpw = $('#weather_panel_wrap');
 				var wpw_color;
@@ -143,6 +152,7 @@
 				wpw.css('background-color',wpw_color);
 				
 			};
+			// после загрузки погоды, ставится картиночка и градусы
 			function on_weather_load(data,textStatus,jqXHR) {
 
 				$('#weather_in_words').html(data.weatherInWords)
@@ -167,6 +177,7 @@
 					error:on_load_error
 				})
 			};
+			// функция загружающая погоду для города city_id
 			function load_weather() {
 				hide_city_bar( );
 				$.ajax({
@@ -176,11 +187,13 @@
 					error:on_load_error
 				});
 			};
+			// после выбора города, функция устанавливает city_id
 			function on_city_select() {
 				var selected = $('#city_selector option:selected');
 				city_id = selected.val();
 				load_weather( );
 			};
+			// после загрузки списка городов, заполняется выпадающий список
 			function on_cities_load(data,textStatus,jqXHR) {
 				var selector = $('#city_selector');
 				for (var i = data.list.length - 1; i >= 0; i--) {
@@ -196,6 +209,7 @@
 				}))
 				$('#city_selector').change(on_city_select);
 			};
+			// загрузить города из статического файла
 			function load_cities( ) {
 				$.ajax({
 					url:'/static/cities.json',
@@ -204,6 +218,8 @@
 				});
 
 			}
+			// при изменении размера окна, блокам присваивается новое
+			// значение высоты
 			function on_window_resize( ) {
 				var wnd = $(window);
 				var cwr = $('.content-wrapper');
@@ -218,6 +234,7 @@
 				$('.cloth-description-boy').height(cco.height());
 				$('.cloth-description-girl').height(cco.height());
 			}
+			// показать панель с описанием вещей
 			function show_description(){
 				if (description_visible){
 					$('.cloth-description-girl,.cloth-description-boy').hide();
@@ -227,6 +244,7 @@
 					description_visible = true;
 				}
 			}
+			// после загрузки документа
 			function on_ready() {
 				load_weather(city_id);
 				load_cities( );

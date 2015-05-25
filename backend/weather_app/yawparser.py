@@ -2,6 +2,9 @@
 import httplib
 import xml.sax
 
+# Парсер погоды с Яндекса
+
+# Хост Яндекса и путь до файла с погодой
 YANDEX_WEATHER_HOST = 'export.yandex.ru'
 YANDEX_WEATHER_PATH = '/weather-ng/forecasts/{city_id}.xml'
 
@@ -15,6 +18,9 @@ WEATHER_STATE_MAP = {
 }
 
 class yandex_weather_parser_handler(xml.sax.ContentHandler):
+	"""
+	Обработчик SAX  для парсинга погоды из XML Яндекса
+	"""
 	def __init__(self):
 		self.weather_state = {}
 		for k,v in WEATHER_STATE_MAP.items():
@@ -47,6 +53,9 @@ class yandex_weather_parser_handler(xml.sax.ContentHandler):
 			self.weather_state['weatherThumbnailURL'] = '/img/wthumb/simple_weather_icon_01.png'
 
 def parse_weather_info(city_id,prepared_connection=None):
+	"""
+	Функция, запрашивающая погоду с Яндекса
+	"""
 	connection = prepared_connection
 	if connection == None:
 		connection = httplib.HTTPConnection(YANDEX_WEATHER_HOST,timeout=5)
